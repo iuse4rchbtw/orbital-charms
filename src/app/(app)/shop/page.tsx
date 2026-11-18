@@ -76,7 +76,17 @@ export default async function ShopPage({ searchParams }: Props) {
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 
   return (
-    <div>
+    <div className="orbital-page">
+      {!searchValue && (
+        <div className="orbital-section-heading">
+          <p className="orbital-kicker">Pre-order collection</p>
+          <h2>Find your next charm</h2>
+          <p>
+            Basic charms start at ₱10. Choose a premade bracelet for ₱170, or use the bracelet
+            builder to create a combination with detailed charms starting from the listed prices.
+          </p>
+        </div>
+      )}
       {searchValue ? (
         <p className="mb-4">
           {products.docs?.length === 0

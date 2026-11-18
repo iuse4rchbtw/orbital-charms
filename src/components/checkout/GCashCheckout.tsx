@@ -24,8 +24,8 @@ export function GCashCheckout() {
         <p className="orbital-kicker">Pre-order received</p>
         <h1>Thank you!</h1>
         <p>
-          This is a demo confirmation. The seller should verify GCash payment and contact you before
-          placing the pre-order into production.
+          Your reservation is complete. The seller will verify the GCash reference or cash payment
+          and contact you about school delivery or pickup before the order is finalized.
         </p>
         <button
           type="button"
@@ -70,11 +70,11 @@ export function GCashCheckout() {
             <legend>Payment</legend>
             <label className="orbital-payment-option">
               <input type="radio" name="payment" value="gcash" defaultChecked />
-              GCash (demo)
+              GCash
             </label>
             <label className="orbital-payment-option">
               <input type="radio" name="payment" value="pickup" />
-              School pickup / cash
+              Cash / school pickup
             </label>
           </fieldset>
           <label>
