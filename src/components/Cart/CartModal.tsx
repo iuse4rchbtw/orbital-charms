@@ -122,6 +122,7 @@ export function CartModal() {
                                 className="h-full w-full object-cover"
                                 height={94}
                                 src={image.url}
+                                unoptimized
                                 width={94}
                               />
                             )}

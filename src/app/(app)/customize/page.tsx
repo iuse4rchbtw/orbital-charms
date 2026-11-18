@@ -35,6 +35,24 @@ export default async function CustomizePage() {
     },
   })
 
+  const premadeResult = await payload.find({
+    collection: 'products',
+    depth: 2,
+    limit: 1,
+    draft: false,
+    overrideAccess: false,
+    where: {
+      and: [
+        { _status: { equals: 'published' } },
+        { slug: { equals: 'premade-italian-bracelet' } },
+      ],
+    },
+  })
+  const bracelet = premadeResult.docs[0]
+  const braceletVariant = bracelet?.variants?.docs?.find((variant) => typeof variant === 'object')
+  const baseVariantId =
+    braceletVariant && typeof braceletVariant === 'object' ? String(braceletVariant.id) : undefined
+
   const charms = result.docs.flatMap((product) => {
     if (!product.variants?.docs) return []
 
@@ -58,6 +76,7 @@ export default async function CustomizePage() {
       return [
         {
           id: String(variant.id),
+          productId: String(product.id),
           name: variant.title || product.title,
           price: typeof variant.priceInUSD === 'number' ? variant.priceInUSD : 0,
           image: media?.url || '',
@@ -66,5 +85,13 @@ export default async function CustomizePage() {
     })
   })
 
-  return <CharmCustomizer charms={charms} />
+  return (
+    <CharmCustomizer
+      base={{
+        productId: bracelet ? String(bracelet.id) : '',
+        variantId: baseVariantId,
+      }}
+      charms={charms}
+    />
+  )
 }

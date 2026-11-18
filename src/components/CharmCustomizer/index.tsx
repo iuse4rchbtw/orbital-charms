@@ -1,16 +1,30 @@
 'use client'
 
-import Link from 'next/link'
 import React, { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { toast } from 'sonner'
 
 type Charm = {
   id: string
+  productId: string
   name: string
   price: number
   image: string
 }
 
-export function CharmCustomizer({ charms }: { charms: Charm[] }) {
+type Props = {
+  base: {
+    productId: string
+    variantId?: string
+  }
+  charms: Charm[]
+}
+
+export function CharmCustomizer({ base, charms }: Props) {
+  const router = useRouter()
+  const { addItem, isLoading } = useCart()
+  const [adding, setAdding] = useState(false)
   const [slots, setSlots] = useState(16)
   const [selected, setSelected] = useState<(Charm | null)[]>(() =>
     Array.from({ length: 16 }, () => null),
@@ -36,7 +50,7 @@ export function CharmCustomizer({ charms }: { charms: Charm[] }) {
     [selected],
   )
 
-  const saveConfiguration = () => {
+  const saveConfiguration = async () => {
     localStorage.setItem(
       'orbital-preorder',
       JSON.stringify({
@@ -46,6 +60,33 @@ export function CharmCustomizer({ charms }: { charms: Charm[] }) {
         total,
       }),
     )
+
+    if (!base.productId) {
+      toast.error('The bracelet base is not available.')
+      return
+    }
+
+    setAdding(true)
+    try {
+      await addItem({
+        product: Number(base.productId),
+        variant: base.variantId ? Number(base.variantId) : undefined,
+      })
+
+      for (const charm of selected.filter((item): item is Charm => Boolean(item))) {
+        await addItem({
+          product: Number(charm.productId),
+          variant: Number(charm.id),
+        })
+      }
+
+      toast.success('Custom bracelet added to your cart.')
+      router.push('/checkout')
+    } catch {
+      toast.error('Could not add the bracelet to your cart.')
+    } finally {
+      setAdding(false)
+    }
   }
 
   return (
@@ -143,9 +184,14 @@ export function CharmCustomizer({ charms }: { charms: Charm[] }) {
               <span>Pre-order total</span>
               <strong>₱{total}</strong>
             </div>
-            <Link className="orbital-button" href="/checkout" onClick={saveConfiguration}>
-              Pre-order this bracelet
-            </Link>
+            <button
+              type="button"
+              className="orbital-button"
+              disabled={adding || isLoading}
+              onClick={() => void saveConfiguration()}
+            >
+              {adding ? 'Adding to cart...' : 'Pre-order this bracelet'}
+            </button>
           </div>
         </div>
       </div>

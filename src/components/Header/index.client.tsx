@@ -10,6 +10,7 @@ import type { Header } from 'src/payload-types'
 
 import { usePathname } from 'next/navigation'
 import { cn } from '@/utilities/cn'
+import { useAuth } from '@/providers/Auth'
 
 type Props = {
   header: Header
@@ -18,6 +19,8 @@ type Props = {
 export function HeaderClient({ header }: Props) {
   const menu = header.navItems || []
   const pathname = usePathname()
+  const { status } = useAuth()
+  const loggedIn = status === 'loggedIn'
 
   return (
     <div className="relative z-20 border-b">
@@ -57,6 +60,22 @@ export function HeaderClient({ header }: Props) {
           </div>
 
           <div className="flex justify-end md:w-1/3 gap-4">
+            <div className="hidden items-center md:flex">
+              {loggedIn ? (
+                <>
+                  <Link className="navLink" href="/account">
+                    Account
+                  </Link>
+                  <Link className="navLink" href="/logout">
+                    Log out
+                  </Link>
+                </>
+              ) : (
+                <Link className="navLink" href="/login">
+                  Log in
+                </Link>
+              )}
+            </div>
             <Suspense fallback={<OpenCartButton />}>
               <Cart />
             </Suspense>

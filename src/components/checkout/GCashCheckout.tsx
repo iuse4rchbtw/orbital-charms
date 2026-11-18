@@ -3,13 +3,17 @@
 import React, { useMemo, useState } from 'react'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import type { Cart } from '@/payload-types'
+import { useAuth } from '@/providers/Auth'
+import Link from 'next/link'
 
 export function GCashCheckout() {
   const { cart, clearCart, isLoading } = useCart()
+  const { user } = useAuth()
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [orderId, setOrderId] = useState<number | string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState('gcash')
 
   const cartItems = cart?.items || []
   const total = useMemo(() => {
@@ -51,6 +55,17 @@ export function GCashCheckout() {
       <div>
         <p className="orbital-kicker">Pre-order checkout</p>
         <h1>Almost yours.</h1>
+        {!user && (
+          <p className="mb-4">
+            You can continue as a guest, or <Link href="/login?redirect=/checkout">log in</Link> /
+            {' '}<Link href="/create-account?redirect=/checkout">create an account</Link>.
+          </p>
+        )}
+        {user && (
+          <p className="mb-4">
+            Checking out as <strong>{user.email}</strong>.
+          </p>
+        )}
         <form
           className="orbital-checkout-form"
           onSubmitCapture={async (event) => {
@@ -104,11 +119,11 @@ export function GCashCheckout() {
         >
           <label>
             Full name
-            <input name="name" required />
+            <input name="name" defaultValue={user?.name || ''} required />
           </label>
           <label>
             Email or messenger
-            <input name="contact" required />
+            <input name="contact" type="email" defaultValue={user?.email || ''} required />
           </label>
           <label>
             Grade and section
@@ -117,18 +132,32 @@ export function GCashCheckout() {
           <fieldset>
             <legend>Payment</legend>
             <label className="orbital-payment-option">
-              <input type="radio" name="payment" value="gcash" defaultChecked />
+              <input
+                type="radio"
+                name="payment"
+                value="gcash"
+                checked={paymentMethod === 'gcash'}
+                onChange={() => setPaymentMethod('gcash')}
+              />
               GCash
             </label>
             <label className="orbital-payment-option">
-              <input type="radio" name="payment" value="cash" />
+              <input
+                type="radio"
+                name="payment"
+                value="cash"
+                checked={paymentMethod === 'cash'}
+                onChange={() => setPaymentMethod('cash')}
+              />
               Cash / school pickup
             </label>
           </fieldset>
-          <label>
-            GCash reference number
-            <input name="reference" placeholder="Enter GCash reference" />
-          </label>
+          {paymentMethod === 'gcash' && (
+            <label>
+              GCash reference number
+              <input name="reference" placeholder="Enter GCash reference" required />
+            </label>
+          )}
           {error && <p className="text-red-600">{error}</p>}
           <button className="orbital-button" type="submit" disabled={submitting || isLoading}>
             {submitting ? 'Placing pre-order...' : 'Place pre-order'}
