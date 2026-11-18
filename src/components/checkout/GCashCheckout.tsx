@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { Price } from '@/components/Price'
 import type { Cart } from '@/payload-types'
 import { useAuth } from '@/providers/Auth'
 import Link from 'next/link'
@@ -21,10 +22,10 @@ export function GCashCheckout() {
       const product = typeof item.product === 'object' ? item.product : null
       const variant = typeof item.variant === 'object' ? item.variant : null
       const price =
-        variant && typeof variant.priceInUSD === 'number'
-          ? variant.priceInUSD
-          : product && typeof product.priceInUSD === 'number'
-            ? product.priceInUSD
+        variant && typeof variant.priceInPHP === 'number'
+          ? variant.priceInPHP
+          : product && typeof product.priceInPHP === 'number'
+            ? product.priceInPHP
             : 0
       return sum + price * (item.quantity || 0)
     }, 0)
@@ -39,11 +40,7 @@ export function GCashCheckout() {
           Pre-order #{orderId} is recorded in Payload. The seller will verify the GCash reference or
           cash payment and contact you about school delivery or pickup.
         </p>
-        <button
-          type="button"
-          className="orbital-button"
-          onClick={() => setSubmitted(false)}
-        >
+        <button type="button" className="orbital-button" onClick={() => setSubmitted(false)}>
           Start a new pre-order
         </button>
       </div>
@@ -57,8 +54,8 @@ export function GCashCheckout() {
         <h1>Almost yours.</h1>
         {!user && (
           <p className="mb-4">
-            You can continue as a guest, or <Link href="/login?redirect=/checkout">log in</Link> /
-            {' '}<Link href="/create-account?redirect=/checkout">create an account</Link>.
+            You can continue as a guest, or <Link href="/login?redirect=/checkout">log in</Link> /{' '}
+            <Link href="/create-account?redirect=/checkout">create an account</Link>.
           </p>
         )}
         {user && (
@@ -92,10 +89,8 @@ export function GCashCheckout() {
                   paymentMethod,
                   reference: form.get('reference'),
                   items: cart.items.map((item) => ({
-                    product:
-                      typeof item.product === 'object' ? item.product?.id : item.product,
-                    variant:
-                      typeof item.variant === 'object' ? item.variant?.id : item.variant,
+                    product: typeof item.product === 'object' ? item.product?.id : item.product,
+                    variant: typeof item.variant === 'object' ? item.variant?.id : item.variant,
                     quantity: item.quantity,
                   })),
                 }),
@@ -183,7 +178,9 @@ export function GCashCheckout() {
             </ul>
             <div className="orbital-order-total">
               <span>Pre-order total</span>
-              <strong>₱{total}</strong>
+              <strong>
+                <Price amount={total} as="span" />
+              </strong>
             </div>
           </>
         ) : (

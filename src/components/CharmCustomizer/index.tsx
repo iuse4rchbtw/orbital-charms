@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { toast } from 'sonner'
 
+import { Price } from '@/components/Price'
+
 type Charm = {
   id: string
   productId: string
@@ -42,11 +44,16 @@ export function CharmCustomizer({ base, charms }: Props) {
   }
 
   const placeCharm = (charm: Charm, index: number) => {
-    setSelected((current) => current.map((item, itemIndex) => (itemIndex === index ? charm : item)))
+    setSelected((current) => {
+      const nextEmptyIndex = current.findIndex((item) => item === null)
+      if (index !== nextEmptyIndex) return current
+
+      return current.map((item, itemIndex) => (itemIndex === index ? charm : item))
+    })
   }
 
   const total = useMemo(
-    () => 170 + selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0),
+    () => selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0),
     [selected],
   )
 
@@ -130,7 +137,9 @@ export function CharmCustomizer({ base, charms }: Props) {
                 </span>
                 <span>
                   <strong>{charm.name}</strong>
-                  <small>₱{charm.price}</small>
+                  <small>
+                    <Price amount={charm.price} as="span" />
+                  </small>
                 </span>
               </button>
             ))}
@@ -142,7 +151,9 @@ export function CharmCustomizer({ base, charms }: Props) {
             {selected.map((charm, index) => (
               <button
                 type="button"
-                aria-label={charm ? `Remove ${charm.name} from slot ${index + 1}` : `Slot ${index + 1}`}
+                aria-label={
+                  charm ? `Remove ${charm.name} from slot ${index + 1}` : `Slot ${index + 1}`
+                }
                 key={index}
                 className={`orbital-bracelet-slot ${charm ? 'is-filled' : ''}`}
                 onDragOver={(event) => event.preventDefault()}
@@ -152,10 +163,12 @@ export function CharmCustomizer({ base, charms }: Props) {
                 }}
                 onClick={() => {
                   if (charm) {
-                    setSelected((current) =>
-                      current.map((item, itemIndex) => (itemIndex === index ? null : item)),
-                    )
-                  } else if (active) {
+                    setSelected((current) => {
+                      const remaining = current.filter((item): item is Charm => Boolean(item))
+                      remaining.splice(index, 1)
+                      return [...remaining, ...Array(current.length - remaining.length).fill(null)]
+                    })
+                  } else if (active && index === selected.findIndex((item) => item === null)) {
                     placeCharm(active, index)
                   }
                 }}
@@ -172,17 +185,21 @@ export function CharmCustomizer({ base, charms }: Props) {
           <div className="orbital-summary">
             <div>
               <span>Bracelet</span>
-              <strong>₱170</strong>
+              <strong>
+                <Price amount={0} as="span" />
+              </strong>
             </div>
             <div>
               <span>{selected.filter(Boolean).length} selected charm(s)</span>
               <strong>
-                ₱{selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0)}
+                <Price amount={total} as="span" />
               </strong>
             </div>
             <div className="orbital-summary-total">
               <span>Pre-order total</span>
-              <strong>₱{total}</strong>
+              <strong>
+                <Price amount={total} as="span" />
+              </strong>
             </div>
             <button
               type="button"

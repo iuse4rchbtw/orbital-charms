@@ -17,6 +17,14 @@ import { customerOnlyFieldAccess } from '@/access/customerOnlyFieldAccess'
 import { isAdmin } from '@/access/isAdmin'
 import { isDocumentOwner } from '@/access/isDocumentOwner'
 
+export const PHP = {
+  code: 'PHP',
+  decimals: 2,
+  label: 'Philippine Peso',
+  symbol: '₱',
+  symbolDisplay: 'symbol',
+} as const
+
 const generateTitle: GenerateTitle<Product | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Ecommerce Template` : 'Payload Ecommerce Template'
 }
@@ -94,6 +102,10 @@ export const plugins: Plugin[] = [
     },
   }),
   ecommercePlugin({
+    currencies: {
+      defaultCurrency: 'PHP',
+      supportedCurrencies: [PHP],
+    },
     access: {
       adminOnlyFieldAccess,
       adminOrPublishedStatus,
