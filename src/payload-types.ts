@@ -257,6 +257,10 @@ export interface Order {
   amount?: number | null;
   currency?: 'USD' | null;
   accessToken?: string | null;
+  customerName?: string | null;
+  gradeSection?: string | null;
+  paymentMethod?: ('gcash' | 'cash') | null;
+  paymentReference?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -342,6 +346,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1369,6 +1374,7 @@ export interface CategoriesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1691,6 +1697,10 @@ export interface OrdersSelect<T extends boolean = true> {
   amount?: T;
   currency?: T;
   accessToken?: T;
+  customerName?: T;
+  gradeSection?: T;
+  paymentMethod?: T;
+  paymentReference?: T;
   updatedAt?: T;
   createdAt?: T;
 }

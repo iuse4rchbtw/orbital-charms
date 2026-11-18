@@ -524,6 +524,14 @@ body {
   font-size: 1.35rem;
 }
 
+.orbital-mini-charm img,
+.orbital-bracelet-slot > span img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
 .orbital-charm-card strong,
 .orbital-charm-card small {
   display: block;

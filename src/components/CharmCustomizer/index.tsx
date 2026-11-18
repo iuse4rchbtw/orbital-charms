@@ -7,22 +7,10 @@ type Charm = {
   id: string
   name: string
   price: number
-  color: string
-  mark: string
+  image: string
 }
 
-const charms: Charm[] = [
-  { id: 'pink', name: 'Blush Heart', price: 10, color: '#f3b8c4', mark: '♡' },
-  { id: 'star', name: 'Pink Star', price: 10, color: '#f7cad5', mark: '★' },
-  { id: 'flower', name: 'Rose Flower', price: 20, color: '#ef9eb3', mark: '✿' },
-  { id: 'sparkle', name: 'Sparkle', price: 20, color: '#f8dfeb', mark: '✦' },
-  { id: 'bow', name: 'Ribbon Bow', price: 40, color: '#e59bb0', mark: '∞' },
-  { id: 'letter', name: 'Initial Charm', price: 20, color: '#f5c9d6', mark: 'A' },
-  { id: 'pearl', name: 'Pearl Drop', price: 50, color: '#fff0f4', mark: '●' },
-  { id: 'chain', name: 'Chain Charm', price: 65, color: '#d4a0ad', mark: '⛓' },
-]
-
-export function CharmCustomizer() {
+export function CharmCustomizer({ charms }: { charms: Charm[] }) {
   const [slots, setSlots] = useState(16)
   const [selected, setSelected] = useState<(Charm | null)[]>(() =>
     Array.from({ length: 16 }, () => null),
@@ -96,8 +84,8 @@ export function CharmCustomizer() {
                 onDragEnd={() => setDragged(null)}
                 onClick={() => setActive(charm)}
               >
-                <span className="orbital-mini-charm" style={{ background: charm.color }}>
-                  {charm.mark}
+                <span className="orbital-mini-charm">
+                  {charm.image ? <img src={charm.image} alt="" /> : <span>Charm</span>}
                 </span>
                 <span>
                   <strong>{charm.name}</strong>
@@ -132,7 +120,7 @@ export function CharmCustomizer() {
                 }}
               >
                 {charm ? (
-                  <span style={{ background: charm.color }}>{charm.mark}</span>
+                  <span>{charm.image ? <img src={charm.image} alt="" /> : charm.name}</span>
                 ) : (
                   <span className="orbital-empty-slot">+</span>
                 )}

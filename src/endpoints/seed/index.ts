@@ -1,4 +1,6 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 
 import { contactFormData } from './contact-form'
 import { contactPageData } from './contact-page'
@@ -9,7 +11,7 @@ import { imageHatData } from './image-hat'
 import { imageTshirtBlackData } from './image-tshirt-black'
 import { imageTshirtWhiteData } from './image-tshirt-white'
 import { imageHero1Data } from './image-hero-1'
-import { Address, Transaction, VariantOption } from '@/payload-types'
+import { Address, Media, Transaction, VariantOption } from '@/payload-types'
 
 const collections: CollectionSlug[] = [
   'categories',
@@ -316,6 +318,226 @@ export const seed = async ({
     ),
   )
 
+  payload.logger.info(`— Seeding Orbital Charms products and variants...`)
+
+  const charmVariantType = await payload.create({
+    collection: 'variantTypes',
+    data: {
+      name: 'design',
+      label: 'Charm Design',
+    },
+  })
+
+  const charmNames: Record<number, string> = {
+    0: 'Silver Bracelet Base',
+    1: 'Gold Bracelet Base',
+    2: 'Rainbow Waves',
+    3: 'Eagle',
+    4: 'I Love Me',
+    5: 'Iron Mask',
+    6: 'Spider Hero',
+    7: 'Panther Wordmark',
+    8: 'Panther Team',
+    9: 'Golden Butterfly',
+    10: 'Silver Butterfly',
+    11: 'Pink Clover',
+    12: 'Crystal Flower',
+    13: 'Pink Butterfly',
+    14: 'Crystal Bow',
+    15: 'Pink Bow',
+    16: 'Heart Key',
+    17: 'Crystal Star',
+    18: 'Purple Bow',
+    19: 'Shell and Star',
+    20: 'Sunburst',
+    21: 'Golden Flower',
+    22: 'Crystal Moon',
+    23: 'Golden Star',
+    24: 'Pink Butterfly',
+    25: 'Gold Bow Chain',
+    26: 'Silver Star Chain',
+    27: 'Blue Butterfly Chain',
+    28: 'Gold Flower Chain',
+  }
+
+  const charmOptions: Record<number, VariantOption> = {}
+  for (let index = 0; index <= 28; index++) {
+    const label = charmNames[index]
+    const option = await payload.create({
+      collection: 'variantOptions',
+      depth: 0,
+      data: {
+        label,
+        value: `charm-${index}`,
+        variantType: charmVariantType.id,
+      },
+    })
+    charmOptions[index] = option
+  }
+
+  const categoryNames = [
+    'Basic Colored',
+    'Basic Image',
+    '3D',
+    'Dangled-Deluxe',
+    'Chained-Deluxe',
+    'Premade Bracelets',
+  ]
+  const categoryResult = await payload.find({
+    collection: 'categories',
+    limit: 100,
+    where: {
+      title: {
+        in: categoryNames,
+      },
+    },
+  })
+  const categoryMap = new Map(categoryResult.docs.map((category) => [category.title, category]))
+
+  const orbitalTypes = [
+    {
+      title: 'Basic Colored Charms',
+      slug: 'basic-colored-charms',
+      category: 'Basic Colored',
+      price: 10,
+      imageIndexes: [2],
+      description: 'Simple colored Italian charm designs for a playful, affordable bracelet.',
+    },
+    {
+      title: 'Basic Image Charms',
+      slug: 'basic-image-charms',
+      category: 'Basic Image',
+      price: 20,
+      imageIndexes: [3, 4, 5, 6, 7, 8],
+      description: 'Popular image charms for school spirit, fandoms, and personal interests.',
+    },
+    {
+      title: '3D Charms',
+      slug: '3d-charms',
+      category: '3D',
+      price: 40,
+      imageIndexes: [9, 10, 11, 12, 13, 21, 22, 23, 24],
+      description: 'Dimensional statement charms with crystal, floral, butterfly, and star details.',
+    },
+    {
+      title: 'Dangled Deluxe Charms',
+      slug: 'dangled-deluxe-charms',
+      category: 'Dangled-Deluxe',
+      price: 50,
+      imageIndexes: [14, 15, 16, 17, 18, 19, 20],
+      description: 'Deluxe charms with playful movement and layered decorative details.',
+    },
+    {
+      title: 'Chained Deluxe Charms',
+      slug: 'chained-deluxe-charms',
+      category: 'Chained-Deluxe',
+      price: 65,
+      imageIndexes: [25, 26, 27, 28],
+      description: 'Charms with attached chains for a detailed, connected bracelet look.',
+    },
+  ]
+
+  const seededCharmProducts: Awaited<ReturnType<typeof payload.create>>[] = []
+
+  for (const type of orbitalTypes) {
+    const gallery: Array<{ image: Media; variantOption: VariantOption }> = []
+
+    for (const index of type.imageIndexes) {
+      const media = await payload.create({
+        collection: 'media',
+        depth: 0,
+        data: {
+          alt: `${charmNames[index]} - Orbital Charms`,
+        },
+        file: await readLocalCharmFile(index),
+      })
+      gallery.push({ image: media as Media, variantOption: charmOptions[index] })
+    }
+
+    const product = await payload.create({
+      collection: 'products',
+      depth: 0,
+      data: {
+        title: type.title,
+        slug: type.slug,
+        _status: 'published',
+        layout: [],
+        gallery,
+        categories: categoryMap.get(type.category) ? [categoryMap.get(type.category)!] : [],
+        enableVariants: true,
+        variantTypes: [charmVariantType],
+        inventory: 999,
+        priceInUSDEnabled: true,
+        priceInUSD: type.price,
+      },
+    })
+
+    for (const item of gallery) {
+      await payload.create({
+        collection: 'variants',
+        depth: 0,
+        data: {
+          title: item.variantOption.label,
+          product: product.id,
+          options: [item.variantOption.id],
+          inventory: 999,
+          priceInUSDEnabled: true,
+          priceInUSD: type.price,
+          _status: 'published',
+        },
+      })
+    }
+
+    seededCharmProducts.push(product)
+  }
+
+  const braceletGallery: Array<{ image: Media; variantOption: VariantOption }> = []
+  for (const index of [0, 1]) {
+    const media = await payload.create({
+      collection: 'media',
+      depth: 0,
+      data: {
+        alt: `${charmNames[index]} - Orbital Charms`,
+      },
+      file: await readLocalCharmFile(index),
+    })
+    braceletGallery.push({ image: media as Media, variantOption: charmOptions[index] })
+  }
+
+  const premadeBracelet = await payload.create({
+    collection: 'products',
+    depth: 0,
+    data: {
+      title: 'Premade Italian Bracelet',
+      slug: 'premade-italian-bracelet',
+      _status: 'published',
+      layout: [],
+      gallery: braceletGallery,
+      categories: categoryMap.get('Premade Bracelets') ? [categoryMap.get('Premade Bracelets')!] : [],
+      enableVariants: true,
+      variantTypes: [charmVariantType],
+      inventory: 999,
+      priceInUSDEnabled: true,
+      priceInUSD: 170,
+    },
+  })
+
+  for (const item of braceletGallery) {
+    await payload.create({
+      collection: 'variants',
+      depth: 0,
+      data: {
+        title: item.variantOption.label,
+        product: premadeBracelet.id,
+        options: [item.variantOption.id],
+        inventory: 999,
+        priceInUSDEnabled: true,
+        priceInUSD: 170,
+        _status: 'published',
+      },
+    })
+  }
+
   payload.logger.info(`— Seeding contact form...`)
 
   const contactForm = await payload.create({
@@ -516,6 +738,15 @@ export const seed = async ({
     },
   })
 
+  await payload.delete({
+    collection: 'products',
+    where: {
+      slug: {
+        in: ['hat', 'tshirt'],
+      },
+    },
+  })
+
   payload.logger.info(`— Seeding globals...`)
 
   await Promise.all([
@@ -597,5 +828,41 @@ async function fetchFileByURL(url: string): Promise<File> {
     data: Buffer.from(data),
     mimetype: `image/${url.split('.').pop()}`,
     size: data.byteLength,
+  }
+}
+
+async function readLocalCharmFile(index: number): Promise<File> {
+  const filePath = path.join(process.cwd(), 'public', 'charms', `${index}.png`)
+  const data = await readFile(filePath)
+
+  return {
+    name: `${index}.png`,
+    data,
+    mimetype: 'image/png',
+    size: data.byteLength,
+  }
+}
+
+function richTextFromString(text: string) {
+  return {
+    root: {
+      type: 'root',
+      children: [
+        {
+          type: 'paragraph',
+          children: [
+            { type: 'text', detail: 0, format: 0, mode: 'normal', style: '', text, version: 1 },
+          ],
+          direction: null,
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      ],
+      direction: null,
+      format: '',
+      indent: 0,
+      version: 1,
+    },
   }
 }

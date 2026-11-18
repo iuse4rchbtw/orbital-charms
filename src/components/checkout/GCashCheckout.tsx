@@ -1,22 +1,30 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-
-type Preorder = {
-  type: string
-  slots: number
-  charms: string[]
-  total: number
-}
+import React, { useMemo, useState } from 'react'
+import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import type { Cart } from '@/payload-types'
 
 export function GCashCheckout() {
-  const [preorder, setPreorder] = useState<Preorder | null>(null)
+  const { cart, clearCart, isLoading } = useCart()
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [orderId, setOrderId] = useState<number | string | null>(null)
 
-  useEffect(() => {
-    const saved = localStorage.getItem('orbital-preorder')
-    if (saved) setPreorder(JSON.parse(saved))
-  }, [])
+  const cartItems = cart?.items || []
+  const total = useMemo(() => {
+    return cartItems.reduce((sum, item) => {
+      const product = typeof item.product === 'object' ? item.product : null
+      const variant = typeof item.variant === 'object' ? item.variant : null
+      const price =
+        variant && typeof variant.priceInUSD === 'number'
+          ? variant.priceInUSD
+          : product && typeof product.priceInUSD === 'number'
+            ? product.priceInUSD
+            : 0
+      return sum + price * (item.quantity || 0)
+    }, 0)
+  }, [cartItems])
 
   if (submitted) {
     return (
@@ -24,17 +32,13 @@ export function GCashCheckout() {
         <p className="orbital-kicker">Pre-order received</p>
         <h1>Thank you!</h1>
         <p>
-          Your reservation is complete. The seller will verify the GCash reference or cash payment
-          and contact you about school delivery or pickup before the order is finalized.
+          Pre-order #{orderId} is recorded in Payload. The seller will verify the GCash reference or
+          cash payment and contact you about school delivery or pickup.
         </p>
         <button
           type="button"
           className="orbital-button"
-          onClick={() => {
-            localStorage.removeItem('orbital-preorder')
-            setSubmitted(false)
-            setPreorder(null)
-          }}
+          onClick={() => setSubmitted(false)}
         >
           Start a new pre-order
         </button>
@@ -49,9 +53,53 @@ export function GCashCheckout() {
         <h1>Almost yours.</h1>
         <form
           className="orbital-checkout-form"
-          onSubmitCapture={(event) => {
+          onSubmitCapture={async (event) => {
             event.preventDefault()
-            setSubmitted(true)
+            if (!cart || !cart.items?.length) {
+              setError('Your cart is empty.')
+              return
+            }
+
+            setSubmitting(true)
+            setError('')
+            const form = new FormData(event.currentTarget)
+            const paymentMethod = form.get('payment')
+
+            try {
+              const response = await fetch('/api/preorders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  cartId: cart.id,
+                  name: form.get('name'),
+                  contact: form.get('contact'),
+                  gradeSection: form.get('section'),
+                  paymentMethod,
+                  reference: form.get('reference'),
+                  items: cart.items.map((item) => ({
+                    product:
+                      typeof item.product === 'object' ? item.product?.id : item.product,
+                    variant:
+                      typeof item.variant === 'object' ? item.variant?.id : item.variant,
+                    quantity: item.quantity,
+                  })),
+                }),
+              })
+              const result = await response.json()
+              if (!response.ok) throw new Error(result.error || 'Could not create the pre-order.')
+
+              setOrderId(result.orderId)
+              await clearCart()
+              setSubmitted(true)
+            } catch (submitError) {
+              setError(
+                submitError instanceof Error
+                  ? submitError.message
+                  : 'Could not create the pre-order.',
+              )
+            } finally {
+              setSubmitting(false)
+            }
           }}
         >
           <label>
@@ -73,40 +121,40 @@ export function GCashCheckout() {
               GCash
             </label>
             <label className="orbital-payment-option">
-              <input type="radio" name="payment" value="pickup" />
+              <input type="radio" name="payment" value="cash" />
               Cash / school pickup
             </label>
           </fieldset>
           <label>
             GCash reference number
-            <input name="reference" placeholder="Use a demo reference for this scaffold" />
+            <input name="reference" placeholder="Enter GCash reference" />
           </label>
-          <button className="orbital-button" type="submit">
-            Place pre-order
+          {error && <p className="text-red-600">{error}</p>}
+          <button className="orbital-button" type="submit" disabled={submitting || isLoading}>
+            {submitting ? 'Placing pre-order...' : 'Place pre-order'}
           </button>
         </form>
       </div>
 
       <aside className="orbital-order-summary">
         <h2>Order summary</h2>
-        {preorder ? (
+        {cartItems.length ? (
           <>
-            <p>
-              <strong>{preorder.type}</strong>
-              <span>{preorder.slots} charm slots</span>
-            </p>
-            {preorder.charms.length ? (
-              <ul>
-                {preorder.charms.map((charm, index) => (
-                  <li key={`${charm}-${index}`}>{charm}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No charms selected yet.</p>
-            )}
+            <ul>
+              {cartItems.map((item: NonNullable<Cart['items']>[number], index) => {
+                const product = typeof item.product === 'object' ? item.product : null
+                const variant = typeof item.variant === 'object' ? item.variant : null
+                return (
+                  <li key={`${product?.id || 'item'}-${index}`}>
+                    {item.quantity} x {product?.title || 'Charm'}
+                    {variant?.title ? ` - ${variant.title}` : ''}
+                  </li>
+                )
+              })}
+            </ul>
             <div className="orbital-order-total">
               <span>Pre-order total</span>
-              <strong>₱{preorder.total}</strong>
+              <strong>₱{total}</strong>
             </div>
           </>
         ) : (

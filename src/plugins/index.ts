@@ -4,6 +4,7 @@ import { Plugin } from 'payload'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { ecommercePlugin } from '@payloadcms/plugin-ecommerce'
+import { s3Storage } from '@payloadcms/storage-s3'
 
 import { stripeAdapter } from '@payloadcms/plugin-ecommerce/payments/stripe'
 
@@ -27,6 +28,22 @@ const generateURL: GenerateURL<Product | Page> = ({ doc }) => {
 }
 
 export const plugins: Plugin[] = [
+  s3Storage({
+    collections: {
+      media: true,
+    },
+    bucket: process.env.S3_BUCKET || 'payload-media',
+    config: {
+      endpoint: process.env.S3_ENDPOINT || 'http://127.0.0.1:54321/storage/v1/s3',
+      region: process.env.S3_REGION || 'local',
+      forcePathStyle: true,
+      credentials: {
+        accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+      },
+    },
+    disableLocalStorage: true,
+  }),
   seoPlugin({
     generateTitle,
     generateURL,
@@ -110,6 +127,30 @@ export const plugins: Plugin[] = [
                   return value
                 },
               ],
+            },
+          },
+          {
+            name: 'customerName',
+            type: 'text',
+          },
+          {
+            name: 'gradeSection',
+            type: 'text',
+          },
+          {
+            name: 'paymentMethod',
+            type: 'select',
+            options: [
+              { label: 'GCash', value: 'gcash' },
+              { label: 'Cash', value: 'cash' },
+            ],
+            defaultValue: 'gcash',
+          },
+          {
+            name: 'paymentReference',
+            type: 'text',
+            admin: {
+              condition: (data) => data?.paymentMethod === 'gcash',
             },
           },
         ],

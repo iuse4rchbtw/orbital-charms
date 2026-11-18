@@ -5,19 +5,25 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import path from 'path'
-import { fileURLToPath } from 'url'
-
 import { adminOnly } from '@/access/adminOnly'
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
 
 export const Media: CollectionConfig = {
   admin: {
     group: 'Content',
   },
   slug: 'media',
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        if (!doc.filename) return doc
+
+        const supabaseURL =
+          process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321'
+        doc.url = `${supabaseURL}/storage/v1/object/public/payload-media/${encodeURIComponent(doc.filename)}`
+        return doc
+      },
+    ],
+  },
   access: {
     create: adminOnly,
     delete: adminOnly,
@@ -41,6 +47,6 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
-    staticDir: path.resolve(dirname, '../../public/media'),
+    disableLocalStorage: true,
   },
 }
