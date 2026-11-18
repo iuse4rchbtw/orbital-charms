@@ -17,9 +17,7 @@ export const Media: CollectionConfig = {
       ({ doc }) => {
         if (!doc.filename) return doc
 
-        const supabaseURL =
-          process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321'
-        doc.url = `${supabaseURL}/storage/v1/object/public/payload-media/${encodeURIComponent(doc.filename)}`
+        doc.url = `/api/media/file/${encodeURIComponent(doc.filename)}`
         return doc
       },
     ],

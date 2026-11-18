@@ -150,6 +150,13 @@ export const plugins: Plugin[] = [
             type: 'text',
           },
           {
+            name: 'braceletConfiguration',
+            type: 'textarea',
+            admin: {
+              description: 'Exact slot-by-slot charm order for custom Italian bracelets.',
+            },
+          },
+          {
             name: 'paymentMethod',
             type: 'select',
             options: [

@@ -16,14 +16,10 @@ type Charm = {
 }
 
 type Props = {
-  base: {
-    productId: string
-    variantId?: string
-  }
   charms: Charm[]
 }
 
-export function CharmCustomizer({ base, charms }: Props) {
+export function CharmCustomizer({ charms }: Props) {
   const router = useRouter()
   const { addItem, isLoading } = useCart()
   const [adding, setAdding] = useState(false)
@@ -56,36 +52,39 @@ export function CharmCustomizer({ base, charms }: Props) {
     () => selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0),
     [selected],
   )
+  const isComplete = selected.length > 0 && selected.every((charm) => charm !== null)
 
   const saveConfiguration = async () => {
-    localStorage.setItem(
-      'orbital-preorder',
-      JSON.stringify({
-        type: 'Custom Italian Bracelet',
-        slots,
-        charms: selected.map((charm) => charm?.name).filter(Boolean),
-        total,
-      }),
-    )
-
-    if (!base.productId) {
-      toast.error('The bracelet base is not available.')
+    if (!isComplete) {
+      toast.error(`Fill all ${slots} charm slots before pre-ordering.`)
       return
     }
 
     setAdding(true)
     try {
-      await addItem({
-        product: Number(base.productId),
-        variant: base.variantId ? Number(base.variantId) : undefined,
-      })
-
       for (const charm of selected.filter((item): item is Charm => Boolean(item))) {
         await addItem({
           product: Number(charm.productId),
           variant: Number(charm.id),
         })
       }
+
+      const charmOrder = selected.map((charm, index) => ({
+        slot: index + 1,
+        charmId: charm?.id,
+        productId: charm?.productId,
+        name: charm?.name,
+      }))
+
+      localStorage.setItem(
+        'orbital-preorder',
+        JSON.stringify({
+          type: 'Custom Italian Bracelet',
+          slots,
+          charms: charmOrder,
+          total,
+        }),
+      )
 
       toast.success('Custom bracelet added to your cart.')
       router.push('/checkout')

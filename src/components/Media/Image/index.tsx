@@ -53,7 +53,9 @@ export const Image: React.FC<MediaProps> = (props) => {
       typeof url === 'string'
         ? url.startsWith('http')
           ? url
-          : `${process.env.NEXT_PUBLIC_SERVER_URL}${url}`
+          : url.startsWith('/')
+            ? url
+            : `${process.env.NEXT_PUBLIC_SERVER_URL}/${url}`
         : ''
   }
 

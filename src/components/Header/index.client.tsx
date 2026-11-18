@@ -24,14 +24,14 @@ export function HeaderClient({ header }: Props) {
 
   return (
     <div className="relative z-20 border-b">
-      <nav className="flex items-center md:items-end justify-between container pt-2">
+      <nav className="flex items-center justify-between container pt-2">
         <div className="block flex-none md:hidden">
           <Suspense fallback={null}>
             <MobileMenu menu={menu} />
           </Suspense>
         </div>
-        <div className="flex w-full items-end justify-between">
-          <div className="flex w-full items-end gap-6 md:w-1/3">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex w-full items-center gap-6 md:w-1/3">
             <Link className="orbital-logo" href="/">
               <span className="orbital-logo-mark" aria-hidden="true">
                 OC
@@ -59,19 +59,19 @@ export function HeaderClient({ header }: Props) {
             ) : null}
           </div>
 
-          <div className="flex items-end justify-end md:w-1/3 gap-4">
-            <div className="hidden h-full items-end gap-4 md:flex">
+          <div className="flex items-center justify-end md:w-1/3 gap-4">
+            <div className="hidden h-full items-center gap-4 md:flex">
               {loggedIn ? (
                 <>
-                  <Link className="navLink pb-2" href="/account">
+                  <Link className="navLink py-2" href="/account">
                     Account
                   </Link>
-                  <Link className="navLink pb-2" href="/logout">
+                  <Link className="navLink py-2" href="/logout">
                     Log out
                   </Link>
                 </>
               ) : (
-                <Link className="navLink pb-2" href="/login">
+                <Link className="navLink py-2" href="/login">
                   Log in
                 </Link>
               )}

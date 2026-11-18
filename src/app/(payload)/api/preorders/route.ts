@@ -95,6 +95,42 @@ export async function POST(request: NextRequest) {
     }
 
     const { user } = await payload.auth({ headers: request.headers })
+    const braceletConfiguration =
+      typeof body.braceletConfiguration === 'object'
+        ? JSON.stringify(body.braceletConfiguration, null, 2)
+        : typeof body.braceletConfiguration === 'string'
+          ? body.braceletConfiguration
+          : undefined
+
+    if (body.braceletConfiguration) {
+      const configuration =
+        typeof body.braceletConfiguration === 'string'
+          ? (() => {
+              try {
+                return JSON.parse(body.braceletConfiguration)
+              } catch {
+                return null
+              }
+            })()
+          : body.braceletConfiguration
+      const charms = configuration?.charms
+      const hasValidCharmOrder =
+        configuration?.type === 'Custom Italian Bracelet' &&
+        Array.isArray(charms) &&
+        charms.length > 0 &&
+        charms.every(
+          (charm: unknown, index: number) =>
+            typeof charm === 'object' &&
+            charm !== null &&
+            (charm as { slot?: unknown }).slot === index + 1 &&
+            typeof (charm as { name?: unknown }).name === 'string',
+        )
+
+      if (!hasValidCharmOrder) {
+        return NextResponse.json({ error: 'The bracelet charm order is invalid.' }, { status: 400 })
+      }
+    }
+
     const order = await payload.create({
       collection: 'orders',
       depth: 0,
@@ -107,6 +143,7 @@ export async function POST(request: NextRequest) {
         gradeSection: body.gradeSection,
         paymentMethod,
         paymentReference: paymentMethod === 'gcash' ? body.reference || '' : '',
+        braceletConfiguration,
         items: orderItems,
         status: 'processing',
       },

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { Price } from '@/components/Price'
 import type { Cart } from '@/payload-types'
@@ -15,6 +15,31 @@ export function GCashCheckout() {
   const [submitting, setSubmitting] = useState(false)
   const [orderId, setOrderId] = useState<number | string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState('gcash')
+  const [braceletConfiguration, setBraceletConfiguration] = useState<{
+    type?: string
+    slots?: number
+    charms?: Array<{ slot: number; charmId?: string; productId?: string; name?: string }>
+    total?: number
+  } | null>(null)
+
+  useEffect(() => {
+    const storedBracelet = localStorage.getItem('orbital-preorder')
+    if (!storedBracelet) {
+      setBraceletConfiguration(null)
+      return
+    }
+
+    try {
+      const parsed = JSON.parse(storedBracelet)
+      if (parsed?.type === 'Custom Italian Bracelet' && Array.isArray(parsed.charms)) {
+        setBraceletConfiguration(parsed)
+      } else {
+        setBraceletConfiguration(null)
+      }
+    } catch {
+      setBraceletConfiguration(null)
+    }
+  }, [])
 
   const cartItems = cart?.items || []
   const total = useMemo(() => {
@@ -30,6 +55,30 @@ export function GCashCheckout() {
       return sum + price * (item.quantity || 0)
     }, 0)
   }, [cartItems])
+
+  const braceletMatchesCart = useMemo(() => {
+    if (!braceletConfiguration?.charms?.length) return false
+
+    const configuredCounts = new Map<string, number>()
+    for (const charm of braceletConfiguration.charms) {
+      if (!charm.charmId) return false
+      configuredCounts.set(charm.charmId, (configuredCounts.get(charm.charmId) || 0) + 1)
+    }
+
+    const cartCounts = new Map<string, number>()
+    for (const item of cartItems) {
+      const variantId = typeof item.variant === 'object' ? item.variant?.id : item.variant
+      if (!variantId) return false
+      const key = String(variantId)
+      cartCounts.set(key, (cartCounts.get(key) || 0) + (item.quantity || 0))
+    }
+
+    if (configuredCounts.size !== cartCounts.size) return false
+    for (const [variantId, quantity] of configuredCounts) {
+      if (cartCounts.get(variantId) !== quantity) return false
+    }
+    return true
+  }, [braceletConfiguration, cartItems])
 
   if (submitted) {
     return (
@@ -88,6 +137,7 @@ export function GCashCheckout() {
                   gradeSection: form.get('section'),
                   paymentMethod,
                   reference: form.get('reference'),
+                  braceletConfiguration: braceletMatchesCart ? braceletConfiguration : undefined,
                   items: cart.items.map((item) => ({
                     product: typeof item.product === 'object' ? item.product?.id : item.product,
                     variant: typeof item.variant === 'object' ? item.variant?.id : item.variant,
@@ -100,6 +150,7 @@ export function GCashCheckout() {
 
               setOrderId(result.orderId)
               await clearCart()
+              localStorage.removeItem('orbital-preorder')
               setSubmitted(true)
             } catch (submitError) {
               setError(
@@ -164,6 +215,19 @@ export function GCashCheckout() {
         <h2>Order summary</h2>
         {cartItems.length ? (
           <>
+            {braceletMatchesCart && braceletConfiguration?.charms?.length ? (
+              <div className="orbital-bracelet-order">
+                <h3>Bracelet charm order</h3>
+                <ol>
+                  {braceletConfiguration.charms.map((charm) => (
+                    <li key={charm.slot}>
+                      <strong>Slot {charm.slot}</strong>
+                      <span>{charm.name || 'Charm'}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
             <ul>
               {cartItems.map((item: NonNullable<Cart['items']>[number], index) => {
                 const product = typeof item.product === 'object' ? item.product : null

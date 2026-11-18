@@ -79,6 +79,7 @@ export default async function Order({ params, searchParams }: PageProps) {
         items: true,
         customerEmail: true,
         customer: true,
+        braceletConfiguration: true,
         status: true,
         createdAt: true,
         updatedAt: true,
@@ -110,6 +111,23 @@ export default async function Order({ params, searchParams }: PageProps) {
 
   if (!order) {
     notFound()
+  }
+
+  let braceletCharms: Array<{
+    slot: number
+    charmId?: string
+    productId?: string
+    name?: string
+  }> | null = null
+  if (order.braceletConfiguration) {
+    try {
+      const parsed = JSON.parse(order.braceletConfiguration)
+      if (parsed?.type === 'Custom Italian Bracelet' && Array.isArray(parsed.charms)) {
+        braceletCharms = parsed.charms
+      }
+    } catch {
+      braceletCharms = null
+    }
   }
 
   return (
@@ -184,6 +202,27 @@ export default async function Order({ params, searchParams }: PageProps) {
                 )
               })}
             </ul>
+          </div>
+        )}
+
+        {order.braceletConfiguration && (
+          <div>
+            <h2 className="font-mono text-primary/50 mb-4 uppercase text-sm">
+              Bracelet charm order
+            </h2>
+            {braceletCharms ? (
+              <ol className="flex flex-col gap-2 rounded-lg border p-4 text-sm">
+                {braceletCharms.map((charm) => (
+                  <li key={charm.slot}>
+                    <strong>Slot {charm.slot}:</strong> {charm.name || 'Charm'}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <pre className="whitespace-pre-wrap rounded-lg border p-4 text-sm">
+                {order.braceletConfiguration}
+              </pre>
+            )}
           </div>
         )}
 

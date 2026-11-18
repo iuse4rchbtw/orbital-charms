@@ -39,36 +39,44 @@ export const CreateAccountForm: React.FC = () => {
 
   const onSubmit = useCallback(
     async (data: FormData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/users`, {
-        body: JSON.stringify(data),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      })
-
-      if (!response.ok) {
-        const message = response.statusText || 'There was an error creating the account.'
-        setError(message)
-        return
-      }
-
-      const redirect = getSafeRedirect({
-        fallbackTo: `/account?success=${encodeURIComponent('Account created successfully')}`,
-        redirectTo: searchParams.get('redirect') ?? '',
-      })
-
-      const timer = setTimeout(() => {
-        setLoading(true)
-      }, 1000)
-
+      setLoading(true)
+      setError(null)
       try {
+        const response = await fetch('/api/users', {
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+            passwordConfirm: data.passwordConfirm,
+          }),
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        })
+
+        if (!response.ok) {
+          const result = await response.json().catch(() => null)
+          const message =
+            result?.errors?.[0]?.message ||
+            result?.message ||
+            response.statusText ||
+            'There was an error creating the account.'
+          setError(message)
+          return
+        }
+
+        const redirect = getSafeRedirect({
+          fallbackTo: `/account?success=${encodeURIComponent('Account created successfully')}`,
+          redirectTo: searchParams.get('redirect') ?? '',
+        })
+
         await login(data)
-        clearTimeout(timer)
         router.push(redirect)
       } catch (_) {
-        clearTimeout(timer)
         setError('There was an error with the credentials provided. Please try again.')
+      } finally {
+        setLoading(false)
       }
     },
     [login, router, searchParams],

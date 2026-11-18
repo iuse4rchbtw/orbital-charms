@@ -259,6 +259,10 @@ export interface Order {
   accessToken?: string | null;
   customerName?: string | null;
   gradeSection?: string | null;
+  /**
+   * Exact slot-by-slot charm order for custom Italian bracelets.
+   */
+  braceletConfiguration?: string | null;
   paymentMethod?: ('gcash' | 'cash') | null;
   paymentReference?: string | null;
   updatedAt: string;
@@ -1699,6 +1703,7 @@ export interface OrdersSelect<T extends boolean = true> {
   accessToken?: T;
   customerName?: T;
   gradeSection?: T;
+  braceletConfiguration?: T;
   paymentMethod?: T;
   paymentReference?: T;
   updatedAt?: T;
