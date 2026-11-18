@@ -1,0 +1,166 @@
+'use client'
+
+import Link from 'next/link'
+import React, { useMemo, useState } from 'react'
+
+type Charm = {
+  id: string
+  name: string
+  price: number
+  color: string
+  mark: string
+}
+
+const charms: Charm[] = [
+  { id: 'pink', name: 'Blush Heart', price: 10, color: '#f3b8c4', mark: '♡' },
+  { id: 'star', name: 'Pink Star', price: 10, color: '#f7cad5', mark: '★' },
+  { id: 'flower', name: 'Rose Flower', price: 20, color: '#ef9eb3', mark: '✿' },
+  { id: 'sparkle', name: 'Sparkle', price: 20, color: '#f8dfeb', mark: '✦' },
+  { id: 'bow', name: 'Ribbon Bow', price: 40, color: '#e59bb0', mark: '∞' },
+  { id: 'letter', name: 'Initial Charm', price: 20, color: '#f5c9d6', mark: 'A' },
+  { id: 'pearl', name: 'Pearl Drop', price: 50, color: '#fff0f4', mark: '●' },
+  { id: 'chain', name: 'Chain Charm', price: 65, color: '#d4a0ad', mark: '⛓' },
+]
+
+export function CharmCustomizer() {
+  const [slots, setSlots] = useState(16)
+  const [selected, setSelected] = useState<(Charm | null)[]>(() =>
+    Array.from({ length: 16 }, () => null),
+  )
+  const [active, setActive] = useState<Charm | null>(charms[0])
+  const [dragged, setDragged] = useState<Charm | null>(null)
+
+  const changeSlots = (count: number) => {
+    const nextCount = Math.max(1, Math.min(24, count))
+    setSlots(nextCount)
+    setSelected((current) => {
+      const next = Array.from({ length: nextCount }, (_, index) => current[index] ?? null)
+      return next
+    })
+  }
+
+  const placeCharm = (charm: Charm, index: number) => {
+    setSelected((current) => current.map((item, itemIndex) => (itemIndex === index ? charm : item)))
+  }
+
+  const total = useMemo(
+    () => 170 + selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0),
+    [selected],
+  )
+
+  const saveConfiguration = () => {
+    localStorage.setItem(
+      'orbital-preorder',
+      JSON.stringify({
+        type: 'Custom Italian Bracelet',
+        slots,
+        charms: selected.map((charm) => charm?.name).filter(Boolean),
+        total,
+      }),
+    )
+  }
+
+  return (
+    <section className="orbital-customizer">
+      <div className="orbital-customizer-header">
+        <div>
+          <p className="orbital-kicker">Interactive pre-order</p>
+          <h1>Build your bracelet</h1>
+        </div>
+        <div className="orbital-slot-control">
+          <label htmlFor="slots">Charm slots</label>
+          <input
+            id="slots"
+            type="range"
+            min="1"
+            max="24"
+            value={slots}
+            onChange={(event) => changeSlots(Number(event.target.value))}
+          />
+          <span>{slots}</span>
+        </div>
+      </div>
+
+      <div className="orbital-customizer-grid">
+        <aside className="orbital-charm-panel">
+          <h2>Charms</h2>
+          <p>Drag a charm onto the bracelet, or select it and tap an empty slot.</p>
+          <div className="orbital-charm-list">
+            {charms.map((charm) => (
+              <button
+                type="button"
+                key={charm.id}
+                className={`orbital-charm-card ${active?.id === charm.id ? 'is-active' : ''}`}
+                draggable
+                onDragStart={() => setDragged(charm)}
+                onDragEnd={() => setDragged(null)}
+                onClick={() => setActive(charm)}
+              >
+                <span className="orbital-mini-charm" style={{ background: charm.color }}>
+                  {charm.mark}
+                </span>
+                <span>
+                  <strong>{charm.name}</strong>
+                  <small>₱{charm.price}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <div className="orbital-bracelet-panel">
+          <div className="orbital-bracelet" aria-label="Custom bracelet preview">
+            {selected.map((charm, index) => (
+              <button
+                type="button"
+                aria-label={charm ? `Remove ${charm.name} from slot ${index + 1}` : `Slot ${index + 1}`}
+                key={index}
+                className={`orbital-bracelet-slot ${charm ? 'is-filled' : ''}`}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault()
+                  if (dragged) placeCharm(dragged, index)
+                }}
+                onClick={() => {
+                  if (charm) {
+                    setSelected((current) =>
+                      current.map((item, itemIndex) => (itemIndex === index ? null : item)),
+                    )
+                  } else if (active) {
+                    placeCharm(active, index)
+                  }
+                }}
+              >
+                {charm ? (
+                  <span style={{ background: charm.color }}>{charm.mark}</span>
+                ) : (
+                  <span className="orbital-empty-slot">+</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="orbital-summary">
+            <div>
+              <span>Bracelet</span>
+              <strong>₱170</strong>
+            </div>
+            <div>
+              <span>{selected.filter(Boolean).length} selected charm(s)</span>
+              <strong>
+                ₱{selected.reduce((sum, charm) => sum + (charm?.price ?? 0), 0)}
+              </strong>
+            </div>
+            <div className="orbital-summary-total">
+              <span>Pre-order total</span>
+              <strong>₱{total}</strong>
+            </div>
+            <Link className="orbital-button" href="/checkout" onClick={saveConfiguration}>
+              Pre-order this bracelet
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
