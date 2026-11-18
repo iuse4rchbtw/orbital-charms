@@ -255,7 +255,7 @@ export interface Order {
   transactions?: (number | Transaction)[] | null;
   status?: OrderStatus;
   amount?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'PHP' | null;
   accessToken?: string | null;
   customerName?: string | null;
   gradeSection?: string | null;
@@ -302,8 +302,8 @@ export interface Product {
     hasNextPage?: boolean;
     totalDocs?: number;
   };
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
+  priceInPHPEnabled?: boolean | null;
+  priceInPHP?: number | null;
   relatedProducts?: (number | Product)[] | null;
   meta?: {
     title?: string | null;
@@ -884,8 +884,8 @@ export interface Variant {
   product: number | Product;
   options: (number | VariantOption)[];
   inventory?: number | null;
-  priceInUSDEnabled?: boolean | null;
-  priceInUSD?: number | null;
+  priceInPHPEnabled?: boolean | null;
+  priceInPHP?: number | null;
   updatedAt: string;
   createdAt: string;
   deletedAt?: string | null;
@@ -929,7 +929,7 @@ export interface Transaction {
   order?: (number | null) | Order;
   cart?: (number | null) | Cart;
   amount?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'PHP' | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -952,7 +952,7 @@ export interface Cart {
   purchasedAt?: string | null;
   status?: ('active' | 'purchased' | 'abandoned') | null;
   subtotal?: number | null;
-  currency?: 'USD' | null;
+  currency?: 'PHP' | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1565,8 +1565,8 @@ export interface VariantsSelect<T extends boolean = true> {
   product?: T;
   options?: T;
   inventory?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
+  priceInPHPEnabled?: T;
+  priceInPHP?: T;
   updatedAt?: T;
   createdAt?: T;
   deletedAt?: T;
@@ -1622,8 +1622,8 @@ export interface ProductsSelect<T extends boolean = true> {
   enableVariants?: T;
   variantTypes?: T;
   variants?: T;
-  priceInUSDEnabled?: T;
-  priceInUSD?: T;
+  priceInPHPEnabled?: T;
+  priceInPHP?: T;
   relatedProducts?: T;
   meta?:
     | T

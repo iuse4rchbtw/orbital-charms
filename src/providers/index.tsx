@@ -6,6 +6,7 @@ import React from 'react'
 import { HeaderThemeProvider } from './HeaderTheme'
 import { ThemeProvider } from './Theme'
 import { SonnerProvider } from '@/providers/Sonner'
+import { PHP } from '@/plugins'
 
 export const Providers: React.FC<{
   children: React.ReactNode
@@ -17,6 +18,10 @@ export const Providers: React.FC<{
           <SonnerProvider />
           <EcommerceProvider
             enableVariants={true}
+            currenciesConfig={{
+              defaultCurrency: 'PHP',
+              supportedCurrencies: [PHP],
+            }}
             api={{
               cartsFetchQuery: {
                 depth: 2,

@@ -41,10 +41,10 @@ export default function HomePage() {
         </div>
         <div className="orbital-category-grid">
           {[
-            ['Colored charms', '₱10', 'Basic charms in simple, colorful designs'],
+            ['Plain charms', '₱10', 'Basic charms in silver or gold'],
             ['Image charms', '₱20', 'Basic charms featuring images and familiar themes'],
             ['3D charms', '₱40', 'Dimensional statement pieces'],
-            ['Dangled Deluxe', '₱50', 'Charms with playful movement'],
+            ['Dangling Deluxe', '₱50', 'Charms with playful movement'],
             ['Chained Deluxe', '₱65', 'Layered chain details'],
             ['Custom images', '₱25', 'Made personal by you'],
           ].map(([title, price, copy]) => (

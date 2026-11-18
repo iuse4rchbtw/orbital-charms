@@ -36,7 +36,7 @@ const categories = [
   'Basic Colored',
   'Basic Image',
   '3D',
-  'Dangled-Deluxe',
+  'Dangling-Deluxe',
   'Chained-Deluxe',
   'Keychain',
   'Special Edition Watch',
@@ -329,9 +329,9 @@ export const seed = async ({
   })
 
   const charmNames: Record<number, string> = {
-    0: 'Silver Bracelet Base',
-    1: 'Gold Bracelet Base',
-    2: 'Rainbow Waves',
+    0: 'Silver',
+    1: 'Gold',
+    2: 'Rainbow Wave',
     3: 'Eagle',
     4: 'I Love Me',
     5: 'Iron Mask',
@@ -379,7 +379,7 @@ export const seed = async ({
     'Basic Colored',
     'Basic Image',
     '3D',
-    'Dangled-Deluxe',
+    'Dangling-Deluxe',
     'Chained-Deluxe',
     'Premade Bracelets',
   ]
@@ -396,34 +396,35 @@ export const seed = async ({
 
   const orbitalTypes = [
     {
-      title: 'Basic Colored Charms',
+      title: 'Plain Charms',
       slug: 'basic-colored-charms',
       category: 'Basic Colored',
-      price: 10,
-      imageIndexes: [2],
-      description: 'Simple colored Italian charm designs for a playful, affordable bracelet.',
+      price: 1000,
+      imageIndexes: [0, 1],
+      description: 'Plain Italian charms in silver or gold.',
     },
     {
       title: 'Basic Image Charms',
       slug: 'basic-image-charms',
       category: 'Basic Image',
-      price: 20,
-      imageIndexes: [3, 4, 5, 6, 7, 8],
+      price: 2000,
+      imageIndexes: [2, 3, 4, 5, 6, 7, 8],
       description: 'Popular image charms for school spirit, fandoms, and personal interests.',
     },
     {
       title: '3D Charms',
       slug: '3d-charms',
       category: '3D',
-      price: 40,
+      price: 4000,
       imageIndexes: [9, 10, 11, 12, 13, 21, 22, 23, 24],
-      description: 'Dimensional statement charms with crystal, floral, butterfly, and star details.',
+      description:
+        'Dimensional statement charms with crystal, floral, butterfly, and star details.',
     },
     {
-      title: 'Dangled Deluxe Charms',
-      slug: 'dangled-deluxe-charms',
-      category: 'Dangled-Deluxe',
-      price: 50,
+      title: 'Dangling Deluxe Charms',
+      slug: 'dangling-deluxe-charms',
+      category: 'Dangling-Deluxe',
+      price: 5000,
       imageIndexes: [14, 15, 16, 17, 18, 19, 20],
       description: 'Deluxe charms with playful movement and layered decorative details.',
     },
@@ -431,7 +432,7 @@ export const seed = async ({
       title: 'Chained Deluxe Charms',
       slug: 'chained-deluxe-charms',
       category: 'Chained-Deluxe',
-      price: 65,
+      price: 6500,
       imageIndexes: [25, 26, 27, 28],
       description: 'Charms with attached chains for a detailed, connected bracelet look.',
     },
@@ -467,8 +468,8 @@ export const seed = async ({
         enableVariants: true,
         variantTypes: [charmVariantType],
         inventory: 999,
-        priceInUSDEnabled: true,
-        priceInUSD: type.price,
+        priceInPHPEnabled: true,
+        priceInPHP: type.price,
       },
     })
 
@@ -481,8 +482,8 @@ export const seed = async ({
           product: product.id,
           options: [item.variantOption.id],
           inventory: 999,
-          priceInUSDEnabled: true,
-          priceInUSD: type.price,
+          priceInPHPEnabled: true,
+          priceInPHP: type.price,
           _status: 'published',
         },
       })
@@ -513,12 +514,14 @@ export const seed = async ({
       _status: 'published',
       layout: [],
       gallery: braceletGallery,
-      categories: categoryMap.get('Premade Bracelets') ? [categoryMap.get('Premade Bracelets')!] : [],
+      categories: categoryMap.get('Premade Bracelets')
+        ? [categoryMap.get('Premade Bracelets')!]
+        : [],
       enableVariants: true,
       variantTypes: [charmVariantType],
       inventory: 999,
-      priceInUSDEnabled: true,
-      priceInUSD: 170,
+      priceInPHPEnabled: true,
+      priceInPHP: 17000,
     },
   })
 
@@ -531,8 +534,8 @@ export const seed = async ({
         product: premadeBracelet.id,
         options: [item.variantOption.id],
         inventory: 999,
-        priceInUSDEnabled: true,
-        priceInUSD: 170,
+        priceInPHPEnabled: true,
+        priceInPHP: 17000,
         _status: 'published',
       },
     })
@@ -591,7 +594,7 @@ export const seed = async ({
   const pendingTransaction = await payload.create({
     collection: 'transactions',
     data: {
-      currency: 'USD',
+      currency: 'PHP',
       customer: customer.id,
       paymentMethod: 'stripe',
       stripe: {
@@ -606,7 +609,7 @@ export const seed = async ({
   const succeededTransaction = await payload.create({
     collection: 'transactions',
     data: {
-      currency: 'USD',
+      currency: 'PHP',
       customer: customer.id,
       paymentMethod: 'stripe',
       stripe: {
@@ -631,7 +634,7 @@ export const seed = async ({
     collection: 'carts',
     data: {
       customer: customer.id,
-      currency: 'USD',
+      currency: 'PHP',
       items: [
         {
           product: productTshirt.id,
@@ -648,7 +651,7 @@ export const seed = async ({
   const abandonedCart = await payload.create({
     collection: 'carts',
     data: {
-      currency: 'USD',
+      currency: 'PHP',
       createdAt: oldTimestamp,
       items: [
         {
@@ -664,9 +667,9 @@ export const seed = async ({
     collection: 'carts',
     data: {
       customer: customer.id,
-      currency: 'USD',
+      currency: 'PHP',
       purchasedAt: new Date().toISOString(),
-      subtotal: 7499,
+      subtotal: 749900,
       items: [
         {
           product: productTshirt.id,
@@ -693,8 +696,8 @@ export const seed = async ({
   const orderInCompleted = await payload.create({
     collection: 'orders',
     data: {
-      amount: 7499,
-      currency: 'USD',
+      amount: 749900,
+      currency: 'PHP',
       customer: customer.id,
       shippingAddress: baseAddressUSData,
       items: [
@@ -717,8 +720,8 @@ export const seed = async ({
   const orderInProcessing = await payload.create({
     collection: 'orders',
     data: {
-      amount: 7499,
-      currency: 'USD',
+      amount: 749900,
+      currency: 'PHP',
       customer: customer.id,
       shippingAddress: baseAddressUSData,
       items: [

@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Your cart is empty.' }, { status: 400 })
     }
     if (cart.status === 'purchased' || cart.purchasedAt) {
-      return NextResponse.json({ error: 'This cart has already been checked out.' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'This cart has already been checked out.' },
+        { status: 400 },
+      )
     }
 
     if (!body.name || !body.contact || !body.gradeSection) {
@@ -47,17 +50,16 @@ export async function POST(request: NextRequest) {
         depth: 0,
       })
 
-      let price = typeof product.priceInUSD === 'number' ? product.priceInUSD : 0
+      let price = typeof product.priceInPHP === 'number' ? product.priceInPHP : 0
 
       if (item.variant) {
-        const variantID =
-          typeof item.variant === 'object' ? item.variant.id : Number(item.variant)
+        const variantID = typeof item.variant === 'object' ? item.variant.id : Number(item.variant)
         const variant = await payload.findByID({
           collection: 'variants',
           id: variantID,
           depth: 0,
         })
-        if (typeof variant.priceInUSD === 'number') price = variant.priceInUSD
+        if (typeof variant.priceInPHP === 'number') price = variant.priceInPHP
         if (typeof variant.inventory === 'number' && variant.inventory < item.quantity) {
           return NextResponse.json(
             { error: `${product.title} does not have enough stock.` },
@@ -76,8 +78,7 @@ export async function POST(request: NextRequest) {
         product: product.id,
         ...(item.variant
           ? {
-              variant:
-                typeof item.variant === 'object' ? item.variant.id : Number(item.variant),
+              variant: typeof item.variant === 'object' ? item.variant.id : Number(item.variant),
             }
           : {}),
         quantity: item.quantity,
@@ -90,10 +91,7 @@ export async function POST(request: NextRequest) {
 
     const paymentMethod = body.paymentMethod === 'cash' ? 'cash' : 'gcash'
     if (paymentMethod === 'gcash' && !body.reference) {
-      return NextResponse.json(
-        { error: 'A GCash reference number is required.' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'A GCash reference number is required.' }, { status: 400 })
     }
 
     const { user } = await payload.auth({ headers: request.headers })
@@ -102,7 +100,7 @@ export async function POST(request: NextRequest) {
       depth: 0,
       data: {
         amount,
-        currency: 'USD',
+        currency: 'PHP',
         customer: user?.id,
         customerEmail: user?.email || body.contact,
         customerName: body.name,

@@ -366,12 +366,12 @@ export const CheckoutPage: React.FC = () => {
               if (!quantity) return null
 
               let image = gallery?.[0]?.image || meta?.image
-              let price = product?.priceInUSD
+              let price = product?.priceInPHP
 
               const isVariant = Boolean(variant) && typeof variant === 'object'
 
               if (isVariant) {
-                price = variant?.priceInUSD
+                price = variant?.priceInPHP
 
                 const imageVariant = product.gallery?.find((item) => {
                   if (!item.variantOption) return false
@@ -380,10 +380,12 @@ export const CheckoutPage: React.FC = () => {
                       ? item.variantOption.id
                       : item.variantOption
 
-                  const hasMatch = variant?.options?.some((option: number | string | VariantOption) => {
-                    if (typeof option === 'object') return option.id === variantOptionID
-                    else return option === variantOptionID
-                  })
+                  const hasMatch = variant?.options?.some(
+                    (option: number | string | VariantOption) => {
+                      if (typeof option === 'object') return option.id === variantOptionID
+                      else return option === variantOptionID
+                    },
+                  )
 
                   return hasMatch
                 })

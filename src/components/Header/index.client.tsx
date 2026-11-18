@@ -59,19 +59,19 @@ export function HeaderClient({ header }: Props) {
             ) : null}
           </div>
 
-          <div className="flex justify-end md:w-1/3 gap-4">
-            <div className="hidden items-center md:flex">
+          <div className="flex items-end justify-end md:w-1/3 gap-4">
+            <div className="hidden h-full items-end gap-4 md:flex">
               {loggedIn ? (
                 <>
-                  <Link className="navLink" href="/account">
+                  <Link className="navLink pb-2" href="/account">
                     Account
                   </Link>
-                  <Link className="navLink" href="/logout">
+                  <Link className="navLink pb-2" href="/logout">
                     Log out
                   </Link>
                 </>
               ) : (
-                <Link className="navLink" href="/login">
+                <Link className="navLink pb-2" href="/login">
                   Log in
                 </Link>
               )}

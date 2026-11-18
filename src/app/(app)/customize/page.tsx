@@ -26,7 +26,7 @@ export default async function CustomizePage() {
               'basic-colored-charms',
               'basic-image-charms',
               '3d-charms',
-              'dangled-deluxe-charms',
+              'dangling-deluxe-charms',
               'chained-deluxe-charms',
             ],
           },
@@ -42,10 +42,7 @@ export default async function CustomizePage() {
     draft: false,
     overrideAccess: false,
     where: {
-      and: [
-        { _status: { equals: 'published' } },
-        { slug: { equals: 'premade-italian-bracelet' } },
-      ],
+      and: [{ _status: { equals: 'published' } }, { slug: { equals: 'premade-italian-bracelet' } }],
     },
   })
   const bracelet = premadeResult.docs[0]
@@ -69,16 +66,14 @@ export default async function CustomizePage() {
         return optionIDs.includes(galleryOptionID)
       })
       const media =
-        galleryItem?.image && typeof galleryItem.image === 'object'
-          ? galleryItem.image
-          : undefined
+        galleryItem?.image && typeof galleryItem.image === 'object' ? galleryItem.image : undefined
 
       return [
         {
           id: String(variant.id),
           productId: String(product.id),
           name: variant.title || product.title,
-          price: typeof variant.priceInUSD === 'number' ? variant.priceInUSD : 0,
+          price: typeof variant.priceInPHP === 'number' ? variant.priceInPHP : 0,
           image: media?.url || '',
         },
       ]

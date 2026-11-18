@@ -81,13 +81,13 @@ export const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex gap-4 justify-between">
+      <div className="flex items-stretch gap-4">
         <Button asChild variant="outline" size="lg">
-          <Link href={`/create-account${allParams}`} className="grow max-w-[50%]">
+          <Link href={`/create-account${allParams}`} className="flex-1">
             Create an account
           </Link>
         </Button>
-        <Button className="grow" disabled={isLoading} size="lg" type="submit" variant="default">
+        <Button className="flex-1" disabled={isLoading} size="lg" type="submit" variant="default">
           {isLoading ? 'Processing' : 'Continue'}
         </Button>
       </div>

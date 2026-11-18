@@ -78,12 +78,12 @@ export function CartModal() {
                       : undefined
 
                   let image = firstGalleryImage || metaImage
-                  let price = product.priceInUSD
+                  let price = product.priceInPHP
 
                   const isVariant = Boolean(variant) && typeof variant === 'object'
 
                   if (isVariant) {
-                    price = variant?.priceInUSD
+                    price = variant?.priceInPHP
 
                     const imageVariant = product.gallery?.find((item) => {
                       if (!item.variantOption) return false
@@ -92,10 +92,12 @@ export function CartModal() {
                           ? item.variantOption.id
                           : item.variantOption
 
-                      const hasMatch = variant?.options?.some((option: number | string | VariantOption) => {
-                        if (typeof option === 'object') return option.id === variantOptionID
-                        else return option === variantOptionID
-                      })
+                      const hasMatch = variant?.options?.some(
+                        (option: number | string | VariantOption) => {
+                          if (typeof option === 'object') return option.id === variantOptionID
+                          else return option === variantOptionID
+                        },
+                      )
 
                       return hasMatch
                     })
