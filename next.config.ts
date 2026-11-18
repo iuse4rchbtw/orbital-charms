@@ -15,6 +15,7 @@ const imageHosts = [NEXT_PUBLIC_SERVER_URL, NEXT_PUBLIC_SUPABASE_URL].filter(
 )
 
 const nextConfig: NextConfig = {
+  agentRules: false,
   // Temporarily required on Windows until Next.js fixes Turbopack Sass resolution.
   // See: https://github.com/vercel/next.js/issues/86431
   sassOptions: {

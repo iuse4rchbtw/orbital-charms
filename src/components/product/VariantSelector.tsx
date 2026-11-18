@@ -25,7 +25,17 @@ export function VariantSelector({ product }: { product: Product }) {
       return <></>
     }
 
-    const options = type.options?.docs
+    const productOptionIDs = new Set(
+      (variants || []).flatMap((variant) => {
+        if (!variant || typeof variant !== 'object') return []
+        return (variant.options || []).map((option) =>
+          typeof option === 'object' ? String(option.id) : String(option),
+        )
+      }),
+    )
+    const options = type.options?.docs?.filter((option) =>
+      typeof option === 'object' ? productOptionIDs.has(String(option.id)) : false,
+    )
 
     if (!options || !Array.isArray(options) || !options.length) {
       return <></>
