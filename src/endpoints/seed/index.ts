@@ -1,4 +1,5 @@
 import type { CollectionSlug, Payload, PayloadRequest, File } from 'payload'
+import { CreateBucketCommand, HeadBucketCommand, S3Client } from '@aws-sdk/client-s3'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -66,6 +67,8 @@ export const seed = async ({
   )
 
   payload.logger.info(`— Seeding Orbital Charms products and variants...`)
+
+  await ensureMediaBucket()
 
   const charmVariantType = await payload.create({
     collection: 'variantTypes',
@@ -210,14 +213,18 @@ export const seed = async ({
         slug: type.slug,
         _status: 'published',
         layout: [],
-        gallery,
-        categories: categoryMap.get(type.category) ? [categoryMap.get(type.category)!] : [],
+        gallery: gallery.map(({ image, variantOption }) => ({
+          image: image.id,
+          variantOption: variantOption.id,
+        })),
+        categories: categoryMap.get(type.category) ? [categoryMap.get(type.category)!.id] : [],
         enableVariants: true,
-        variantTypes: [charmVariantType],
+        variantTypes: [charmVariantType.id],
         inventory: 999,
         priceInPHPEnabled: true,
         priceInPHP: type.price,
       },
+      req,
     })
 
     for (const item of gallery) {
@@ -233,6 +240,7 @@ export const seed = async ({
           priceInPHP: type.price,
           _status: 'published',
         },
+        req,
       })
     }
 
@@ -260,16 +268,20 @@ export const seed = async ({
       slug: 'premade-italian-bracelet',
       _status: 'published',
       layout: [],
-      gallery: braceletGallery,
+      gallery: braceletGallery.map(({ image, variantOption }) => ({
+        image: image.id,
+        variantOption: variantOption.id,
+      })),
       categories: categoryMap.get('Premade Bracelets')
-        ? [categoryMap.get('Premade Bracelets')!]
+        ? [categoryMap.get('Premade Bracelets')!.id]
         : [],
       enableVariants: true,
-      variantTypes: [charmVariantType],
+      variantTypes: [charmVariantType.id],
       inventory: 999,
       priceInPHPEnabled: true,
       priceInPHP: 17000,
     },
+    req,
   })
 
   for (const item of braceletGallery) {
@@ -285,6 +297,7 @@ export const seed = async ({
         priceInPHP: 17000,
         _status: 'published',
       },
+      req,
     })
   }
 
@@ -301,6 +314,31 @@ async function readLocalCharmFile(index: number): Promise<File> {
     mimetype: 'image/png',
     size: data.byteLength,
   }
+}
+
+async function ensureMediaBucket(): Promise<void> {
+  const bucket = process.env.S3_BUCKET || 'payload-media'
+  const client = new S3Client({
+    endpoint: process.env.S3_ENDPOINT || 'http://127.0.0.1:54321/storage/v1/s3',
+    region: process.env.S3_REGION || 'local',
+    forcePathStyle: true,
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+    },
+  })
+
+  try {
+    await client.send(new HeadBucketCommand({ Bucket: bucket }))
+    return
+  } catch (error) {
+    const code = error instanceof Error && 'Code' in error ? error.Code : undefined
+    if (code !== 'NotFound' && code !== 'NoSuchBucket' && code !== '404') {
+      throw error
+    }
+  }
+
+  await client.send(new CreateBucketCommand({ Bucket: bucket }))
 }
 
 function richTextFromString(text: string) {

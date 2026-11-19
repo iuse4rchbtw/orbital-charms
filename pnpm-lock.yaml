@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1170.0
+        version: 3.1170.0
       '@payloadcms/admin-bar':
         specifier: 3.94.0
         version: 3.94.0(react-dom@19.2.9(react@19.2.9))(react@19.2.9)
