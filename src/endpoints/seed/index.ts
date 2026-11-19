@@ -188,12 +188,9 @@ export const seed = async ({
     },
   ]
 
-  const seededCharmProducts: Awaited<ReturnType<typeof payload.create>>[] = []
-
-  for (const type of orbitalTypes) {
-    const gallery: Array<{ image: Media; variantOption: VariantOption }> = []
-
-    for (const index of type.imageIndexes) {
+  const mediaByIndex = new Map<number, Media>()
+  await Promise.all(
+    Array.from({ length: 29 }, async (_, index) => {
       const media = await payload.create({
         collection: 'media',
         depth: 0,
@@ -202,6 +199,21 @@ export const seed = async ({
         },
         file: await readLocalCharmFile(index),
       })
+      mediaByIndex.set(index, media as Media)
+    }),
+  )
+
+  const seededCharmProducts: Awaited<ReturnType<typeof payload.create>>[] = []
+
+  for (const type of orbitalTypes) {
+    const gallery: Array<{ image: Media; variantOption: VariantOption }> = []
+
+    for (const index of type.imageIndexes) {
+      const media = mediaByIndex.get(index)
+      if (!media) {
+        throw new Error(`Missing seeded media for charm index ${index}`)
+      }
+
       gallery.push({ image: media as Media, variantOption: charmOptions[index] })
     }
 
@@ -249,14 +261,11 @@ export const seed = async ({
 
   const braceletGallery: Array<{ image: Media; variantOption: VariantOption }> = []
   for (const index of [0, 1]) {
-    const media = await payload.create({
-      collection: 'media',
-      depth: 0,
-      data: {
-        alt: `${charmNames[index]} - Orbital Charms`,
-      },
-      file: await readLocalCharmFile(index),
-    })
+    const media = mediaByIndex.get(index)
+    if (!media) {
+      throw new Error(`Missing seeded media for charm index ${index}`)
+    }
+
     braceletGallery.push({ image: media as Media, variantOption: charmOptions[index] })
   }
 
