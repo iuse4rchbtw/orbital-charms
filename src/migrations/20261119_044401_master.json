@@ -4117,6 +4117,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "_objectkey": {
+          "name": "_objectkey",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "timestamp(3) with time zone",
@@ -6086,14 +6092,14 @@
           "notNull": false,
           "default": 0
         },
-        "price_in_u_s_d_enabled": {
-          "name": "price_in_u_s_d_enabled",
+        "price_in_p_h_p_enabled": {
+          "name": "price_in_p_h_p_enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
-        "price_in_u_s_d": {
-          "name": "price_in_u_s_d",
+        "price_in_p_h_p": {
+          "name": "price_in_p_h_p",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -6391,14 +6397,14 @@
           "notNull": false,
           "default": 0
         },
-        "version_price_in_u_s_d_enabled": {
-          "name": "version_price_in_u_s_d_enabled",
+        "version_price_in_p_h_p_enabled": {
+          "name": "version_price_in_p_h_p_enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
-        "version_price_in_u_s_d": {
-          "name": "version_price_in_u_s_d",
+        "version_price_in_p_h_p": {
+          "name": "version_price_in_p_h_p",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -7791,14 +7797,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "price_in_u_s_d_enabled": {
-          "name": "price_in_u_s_d_enabled",
+        "price_in_p_h_p_enabled": {
+          "name": "price_in_p_h_p_enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
-        "price_in_u_s_d": {
-          "name": "price_in_u_s_d",
+        "price_in_p_h_p": {
+          "name": "price_in_p_h_p",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -9019,14 +9025,14 @@
           "primaryKey": false,
           "notNull": false
         },
-        "version_price_in_u_s_d_enabled": {
-          "name": "version_price_in_u_s_d_enabled",
+        "version_price_in_p_h_p_enabled": {
+          "name": "version_price_in_p_h_p_enabled",
           "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
-        "version_price_in_u_s_d": {
-          "name": "version_price_in_u_s_d",
+        "version_price_in_p_h_p": {
+          "name": "version_price_in_p_h_p",
           "type": "numeric",
           "primaryKey": false,
           "notNull": false
@@ -9740,7 +9746,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'USD'"
+          "default": "'PHP'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -10099,10 +10105,42 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'USD'"
+          "default": "'PHP'"
         },
         "access_token": {
           "name": "access_token",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "grade_section": {
+          "name": "grade_section",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bracelet_configuration": {
+          "name": "bracelet_configuration",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "enum_orders_payment_method",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'gcash'"
+        },
+        "payment_reference": {
+          "name": "payment_reference",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -10626,7 +10664,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "'USD'"
+          "default": "'PHP'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -12714,7 +12752,7 @@
       "name": "enum_carts_currency",
       "schema": "public",
       "values": [
-        "USD"
+        "PHP"
       ]
     },
     "public.enum_orders_status": {
@@ -12731,7 +12769,15 @@
       "name": "enum_orders_currency",
       "schema": "public",
       "values": [
-        "USD"
+        "PHP"
+      ]
+    },
+    "public.enum_orders_payment_method": {
+      "name": "enum_orders_payment_method",
+      "schema": "public",
+      "values": [
+        "gcash",
+        "cash"
       ]
     },
     "public.enum_transactions_payment_method": {
@@ -12758,7 +12804,7 @@
       "name": "enum_transactions_currency",
       "schema": "public",
       "values": [
-        "USD"
+        "PHP"
       ]
     },
     "public.enum_header_nav_items_link_type": {
@@ -12788,6 +12834,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "63c2ffa7-7412-4f93-ab6c-7e9925bc4c7a",
+  "id": "c912c1be-edcc-41e4-8e18-da35a006e344",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

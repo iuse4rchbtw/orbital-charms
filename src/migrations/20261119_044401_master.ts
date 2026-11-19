@@ -47,12 +47,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE TYPE "public"."enum__products_v_blocks_content_columns_link_type" AS ENUM('reference', 'custom');
   CREATE TYPE "public"."enum__products_v_blocks_content_columns_link_appearance" AS ENUM('default', 'outline');
   CREATE TYPE "public"."enum__products_v_version_status" AS ENUM('draft', 'published');
-  CREATE TYPE "public"."enum_carts_currency" AS ENUM('USD');
+  CREATE TYPE "public"."enum_carts_currency" AS ENUM('PHP');
   CREATE TYPE "public"."enum_orders_status" AS ENUM('processing', 'completed', 'cancelled', 'refunded');
-  CREATE TYPE "public"."enum_orders_currency" AS ENUM('USD');
+  CREATE TYPE "public"."enum_orders_currency" AS ENUM('PHP');
+  CREATE TYPE "public"."enum_orders_payment_method" AS ENUM('gcash', 'cash');
   CREATE TYPE "public"."enum_transactions_payment_method" AS ENUM('stripe');
   CREATE TYPE "public"."enum_transactions_status" AS ENUM('pending', 'processing', 'succeeded', 'failed', 'cancelled', 'expired', 'refunded');
-  CREATE TYPE "public"."enum_transactions_currency" AS ENUM('USD');
+  CREATE TYPE "public"."enum_transactions_currency" AS ENUM('PHP');
   CREATE TYPE "public"."enum_header_nav_items_link_type" AS ENUM('reference', 'custom');
   CREATE TYPE "public"."enum_footer_nav_items_link_type" AS ENUM('reference', 'custom');
   CREATE TABLE "users_roles" (
@@ -398,6 +399,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"id" serial PRIMARY KEY NOT NULL,
   	"alt" varchar NOT NULL,
   	"caption" jsonb,
+  	"_objectkey" varchar,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"url" varchar,
@@ -592,8 +594,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"title" varchar,
   	"product_id" integer,
   	"inventory" numeric DEFAULT 0,
-  	"price_in_u_s_d_enabled" boolean,
-  	"price_in_u_s_d" numeric,
+  	"price_in_p_h_p_enabled" boolean,
+  	"price_in_p_h_p" numeric,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"deleted_at" timestamp(3) with time zone,
@@ -614,8 +616,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_title" varchar,
   	"version_product_id" integer,
   	"version_inventory" numeric DEFAULT 0,
-  	"version_price_in_u_s_d_enabled" boolean,
-  	"version_price_in_u_s_d" numeric,
+  	"version_price_in_p_h_p_enabled" boolean,
+  	"version_price_in_p_h_p" numeric,
   	"version_updated_at" timestamp(3) with time zone,
   	"version_created_at" timestamp(3) with time zone,
   	"version_deleted_at" timestamp(3) with time zone,
@@ -719,8 +721,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"description" jsonb,
   	"inventory" numeric DEFAULT 0,
   	"enable_variants" boolean,
-  	"price_in_u_s_d_enabled" boolean,
-  	"price_in_u_s_d" numeric,
+  	"price_in_p_h_p_enabled" boolean,
+  	"price_in_p_h_p" numeric,
   	"meta_title" varchar,
   	"meta_image_id" integer,
   	"meta_description" varchar,
@@ -815,8 +817,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"version_description" jsonb,
   	"version_inventory" numeric DEFAULT 0,
   	"version_enable_variants" boolean,
-  	"version_price_in_u_s_d_enabled" boolean,
-  	"version_price_in_u_s_d" numeric,
+  	"version_price_in_p_h_p_enabled" boolean,
+  	"version_price_in_p_h_p" numeric,
   	"version_meta_title" varchar,
   	"version_meta_image_id" integer,
   	"version_meta_description" varchar,
@@ -858,7 +860,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"customer_id" integer,
   	"purchased_at" timestamp(3) with time zone,
   	"subtotal" numeric,
-  	"currency" "enum_carts_currency" DEFAULT 'USD',
+  	"currency" "enum_carts_currency" DEFAULT 'PHP',
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
@@ -889,8 +891,13 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"customer_email" varchar,
   	"status" "enum_orders_status" DEFAULT 'processing',
   	"amount" numeric,
-  	"currency" "enum_orders_currency" DEFAULT 'USD',
+  	"currency" "enum_orders_currency" DEFAULT 'PHP',
   	"access_token" varchar,
+  	"customer_name" varchar,
+  	"grade_section" varchar,
+  	"bracelet_configuration" varchar,
+  	"payment_method" "enum_orders_payment_method" DEFAULT 'gcash',
+  	"payment_reference" varchar,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
@@ -934,7 +941,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"order_id" integer,
   	"cart_id" integer,
   	"amount" numeric,
-  	"currency" "enum_transactions_currency" DEFAULT 'USD',
+  	"currency" "enum_transactions_currency" DEFAULT 'PHP',
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
@@ -1633,6 +1640,7 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TYPE "public"."enum_carts_currency";
   DROP TYPE "public"."enum_orders_status";
   DROP TYPE "public"."enum_orders_currency";
+  DROP TYPE "public"."enum_orders_payment_method";
   DROP TYPE "public"."enum_transactions_payment_method";
   DROP TYPE "public"."enum_transactions_status";
   DROP TYPE "public"."enum_transactions_currency";
