@@ -46,7 +46,6 @@ export function AddToCart({ product }: Props) {
         variant: selectedVariant?.id ?? undefined,
       })
         .then(() => {
-          localStorage.removeItem('orbital-preorder')
           toast.success('Item added to cart.')
         })
         .catch(() => {

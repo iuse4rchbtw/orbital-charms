@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
 import { Price } from '@/components/Price'
-import type { Cart } from '@/payload-types'
 import { useAuth } from '@/providers/Auth'
 import Link from 'next/link'
 
@@ -68,17 +67,38 @@ export function GCashCheckout() {
     const cartCounts = new Map<string, number>()
     for (const item of cartItems) {
       const variantId = typeof item.variant === 'object' ? item.variant?.id : item.variant
-      if (!variantId) return false
+      if (!variantId) continue
       const key = String(variantId)
       cartCounts.set(key, (cartCounts.get(key) || 0) + (item.quantity || 0))
     }
 
-    if (configuredCounts.size !== cartCounts.size) return false
     for (const [variantId, quantity] of configuredCounts) {
-      if (cartCounts.get(variantId) !== quantity) return false
+      if ((cartCounts.get(variantId) || 0) < quantity) return false
     }
     return true
   }, [braceletConfiguration, cartItems])
+
+  const normalCartItems = useMemo(() => {
+    if (!braceletMatchesCart || !braceletConfiguration?.charms?.length) return cartItems
+
+    const configuredCounts = new Map<string, number>()
+    for (const charm of braceletConfiguration.charms) {
+      if (!charm.charmId) continue
+      configuredCounts.set(charm.charmId, (configuredCounts.get(charm.charmId) || 0) + 1)
+    }
+
+    return cartItems.flatMap((item) => {
+      const variantId = typeof item.variant === 'object' ? item.variant?.id : item.variant
+      const configuredQuantity = variantId ? configuredCounts.get(String(variantId)) || 0 : 0
+      const quantity = Math.max(0, (item.quantity || 0) - configuredQuantity)
+
+      if (variantId) {
+        configuredCounts.set(String(variantId), Math.max(0, configuredQuantity - (item.quantity || 0)))
+      }
+
+      return quantity > 0 ? [{ item, quantity }] : []
+    })
+  }, [braceletConfiguration, braceletMatchesCart, cartItems])
 
   if (submitted) {
     return (
@@ -228,18 +248,23 @@ export function GCashCheckout() {
                 </ol>
               </div>
             ) : null}
-            <ul>
-              {cartItems.map((item: NonNullable<Cart['items']>[number], index) => {
-                const product = typeof item.product === 'object' ? item.product : null
-                const variant = typeof item.variant === 'object' ? item.variant : null
-                return (
-                  <li key={`${product?.id || 'item'}-${index}`}>
-                    {item.quantity} x {product?.title || 'Charm'}
-                    {variant?.title ? ` - ${variant.title}` : ''}
-                  </li>
-                )
-              })}
-            </ul>
+            {normalCartItems.length > 0 && (
+              <div>
+                {braceletMatchesCart && <h3>Shop charms</h3>}
+                <ul>
+                  {normalCartItems.map(({ item, quantity }, index) => {
+                    const product = typeof item.product === 'object' ? item.product : null
+                    const variant = typeof item.variant === 'object' ? item.variant : null
+                    return (
+                      <li key={`${product?.id || 'item'}-${index}`}>
+                        {quantity} x {product?.title || 'Charm'}
+                        {variant?.title ? ` - ${variant.title}` : ''}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
             <div className="orbital-order-total">
               <span>Pre-order total</span>
               <strong>
