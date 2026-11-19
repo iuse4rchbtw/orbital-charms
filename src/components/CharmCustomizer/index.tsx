@@ -25,9 +25,9 @@ export function CharmCustomizer({ charms }: Props) {
   const router = useRouter()
   const { refreshCart, cart, isLoading } = useCart()
   const [adding, setAdding] = useState(false)
-  const [slots, setSlots] = useState(16)
+  const [slots, setSlots] = useState(18)
   const [selected, setSelected] = useState<(Charm | null)[]>(() =>
-    Array.from({ length: 16 }, () => null),
+    Array.from({ length: 18 }, () => null),
   )
   const [active, setActive] = useState<Charm | null>(charms[0])
   const [dragged, setDragged] = useState<Charm | null>(null)
