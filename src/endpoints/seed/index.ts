@@ -1,6 +1,6 @@
-import type { CollectionSlug, Payload, PayloadRequest, File } from 'payload'
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
+import type { CollectionSlug, File, Payload, PayloadRequest } from 'payload'
 
 import { Media, VariantOption } from '@/payload-types'
 
@@ -195,7 +195,7 @@ export const seed = async ({
       slug: '3d-charms',
       category: '3D',
       price: 4000,
-      imageIndexes: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
+      imageIndexes: [9, 10, 11, 12, 13, 21, 22, 23, 24],
       description:
         'Dimensional statement charms with crystal, floral, butterfly, and star details.',
     },

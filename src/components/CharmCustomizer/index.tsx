@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useCart } from '@payloadcms/plugin-ecommerce/client/react'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Price } from '@/components/Price'
@@ -64,41 +64,11 @@ export function CharmCustomizer({ charms }: Props) {
     try {
       const selectedCharms = selected.filter((item): item is Charm => Boolean(item))
 
-      if (cart?.id) {
-        for (const charm of selectedCharms) {
-          await addItem({
-            product: Number(charm.productId),
-            variant: Number(charm.id),
-          })
-        }
-      } else {
-        const secret = localStorage.getItem('cart_secret')
-        const response = await fetch('/api/carts', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            currency: 'PHP',
-            items: selectedCharms.map((charm) => ({
-              product: Number(charm.productId),
-              variant: Number(charm.id),
-              quantity: 1,
-            })),
-            ...(secret ? { secret } : {}),
-          }),
+      for (const charm of selectedCharms) {
+        await addItem({
+          product: Number(charm.productId),
+          variant: Number(charm.id),
         })
-        if (!response.ok) {
-          throw new Error('Could not create the bracelet cart.')
-        }
-        const created = await response.json()
-        const createdCart = created.doc
-        if (!createdCart?.id) {
-          throw new Error('The bracelet cart was not created.')
-        }
-        localStorage.setItem('cart', String(createdCart.id))
-        if (createdCart.secret) {
-          localStorage.setItem('cart_secret', createdCart.secret)
-        }
       }
 
       const charmOrder = selected.map((charm, index) => ({
