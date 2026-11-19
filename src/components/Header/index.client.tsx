@@ -17,7 +17,17 @@ type Props = {
 }
 
 export function HeaderClient({ header }: Props) {
-  const menu = header.navItems || []
+  const fallbackMenu: Header['navItems'] = [
+    {
+      id: 'customize',
+      link: { type: 'custom', url: '/customize', label: 'Customizer', newTab: false },
+    },
+    {
+      id: 'shop',
+      link: { type: 'custom', url: '/shop', label: 'Shop', newTab: false },
+    },
+  ]
+  const menu = header.navItems?.length ? header.navItems : fallbackMenu
   const pathname = usePathname()
   const { status } = useAuth()
   const loggedIn = status === 'loggedIn'
@@ -33,10 +43,7 @@ export function HeaderClient({ header }: Props) {
         <div className="flex w-full items-center justify-between">
           <div className="flex w-full items-center gap-6 md:w-1/3">
             <Link className="orbital-logo" href="/">
-              <span className="orbital-logo-mark" aria-hidden="true">
-                OC
-              </span>
-              <span>Orbital Charms</span>
+              <img className="orbital-logo-image" src="/logo.png" alt="Orbital Charms" />
             </Link>
             {menu.length ? (
               <ul className="hidden gap-4 text-sm md:flex md:items-center">

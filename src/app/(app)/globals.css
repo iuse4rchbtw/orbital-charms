@@ -266,6 +266,18 @@ body {
   letter-spacing: 0.08em;
 }
 
+.orbital-logo-image {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: contain;
+}
+
+.orbital-footer-logo {
+  width: 3.25rem;
+  height: 3.25rem;
+  object-fit: contain;
+}
+
 .orbital-page,
 .orbital-customizer {
   max-width: 80rem;
@@ -377,6 +389,7 @@ body {
   font-size: 2rem;
   transform: translateX(-1rem);
   box-shadow: 0 0.4rem 1rem rgba(158, 103, 123, 0.12);
+  object-fit: contain;
 }
 
 .orbital-section-heading {
@@ -405,6 +418,13 @@ body {
   padding: 1.5rem;
 }
 
+.orbital-category-photo {
+  width: 5.5rem;
+  height: 5.5rem;
+  margin-top: 1.25rem;
+  object-fit: contain;
+}
+
 .orbital-category-card > span {
   display: block;
   color: #a86a7c;
@@ -413,7 +433,7 @@ body {
 }
 
 .orbital-category-card h3 {
-  margin-top: 7rem;
+  margin-top: 1.25rem;
   font-size: 1.5rem;
 }
 

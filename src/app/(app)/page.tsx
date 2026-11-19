@@ -27,10 +27,10 @@ export default function HomePage() {
           </div>
         </div>
         <div className="orbital-hero-art" aria-label="Orbital Charms bracelet preview">
-          <div className="orbital-hero-charm">♡</div>
-          <div className="orbital-hero-charm">✿</div>
-          <div className="orbital-hero-charm">★</div>
-          <div className="orbital-hero-charm">A</div>
+          <img className="orbital-hero-charm" src="/charms/9.png" alt="Butterfly charm" />
+          <img className="orbital-hero-charm" src="/charms/14.png" alt="Bow charm" />
+          <img className="orbital-hero-charm" src="/charms/17.png" alt="Crystal star charm" />
+          <img className="orbital-hero-charm" src="/charms/24.png" alt="Pink butterfly charm" />
         </div>
       </section>
 
@@ -41,15 +41,21 @@ export default function HomePage() {
         </div>
         <div className="orbital-category-grid">
           {[
-            ['Plain charms', '₱10', 'Basic charms in silver or gold'],
-            ['Image charms', '₱20', 'Basic charms featuring images and familiar themes'],
-            ['3D charms', '₱40', 'Dimensional statement pieces'],
-            ['Dangling Deluxe', '₱50', 'Charms with playful movement'],
-            ['Chained Deluxe', '₱65', 'Layered chain details'],
-            ['Custom images', '₱25', 'Made personal by you'],
-          ].map(([title, price, copy]) => (
+            ['Plain charms', '₱10', 'Basic charms in silver or gold', '/charms/0.png'],
+            [
+              'Image charms',
+              '₱20',
+              'Basic charms featuring images and familiar themes',
+              '/charms/3.png',
+            ],
+            ['3D charms', '₱40', 'Dimensional statement pieces', '/charms/9.png'],
+            ['Dangling Deluxe', '₱50', 'Charms with playful movement', '/charms/14.png'],
+            ['Chained Deluxe', '₱65', 'Layered chain details', '/charms/25.png'],
+            ['Premade bracelets', '₱170', 'Ready-to-wear bracelet designs', '/charms/32.png'],
+          ].map(([title, price, copy, image]) => (
             <article className="orbital-category-card" key={title}>
               <span>{price}</span>
+              <img className="orbital-category-photo" src={image} alt={title} />
               <h3>{title}</h3>
               <p>{copy}</p>
             </article>
