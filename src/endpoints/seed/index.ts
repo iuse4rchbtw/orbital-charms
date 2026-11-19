@@ -66,6 +66,34 @@ export const seed = async ({
     ),
   )
 
+  await payload.updateGlobal({
+    slug: 'header',
+    data: {
+      navItems: [
+        {
+          link: { type: 'custom', url: '/customize', label: 'Customizer', newTab: false },
+        },
+        {
+          link: { type: 'custom', url: '/shop', label: 'Shop', newTab: false },
+        },
+      ],
+    },
+  })
+
+  await payload.updateGlobal({
+    slug: 'footer',
+    data: {
+      navItems: [
+        {
+          link: { type: 'custom', url: '/customize', label: 'Customizer', newTab: false },
+        },
+        {
+          link: { type: 'custom', url: '/shop', label: 'Shop', newTab: false },
+        },
+      ],
+    },
+  })
+
   payload.logger.info(`— Seeding Orbital Charms products and variants...`)
 
   const charmVariantType = await payload.create({
@@ -106,11 +134,14 @@ export const seed = async ({
     26: 'Silver Star Chain',
     27: 'Blue Butterfly Chain',
     28: 'Gold Flower Chain',
+    32: 'Premade Bracelet 1',
+    33: 'Premade Bracelet 2',
   }
 
   const charmOptions: Record<number, VariantOption> = {}
-  for (let index = 0; index <= 28; index++) {
+  for (const index of [...Array.from({ length: 29 }, (_, value) => value), 32, 33]) {
     const label = charmNames[index]
+    if (!label) continue
     const option = await payload.create({
       collection: 'variantOptions',
       depth: 0,
@@ -164,7 +195,7 @@ export const seed = async ({
       slug: '3d-charms',
       category: '3D',
       price: 4000,
-      imageIndexes: [9, 10, 11, 12, 13, 21, 22, 23, 24],
+      imageIndexes: [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
       description:
         'Dimensional statement charms with crystal, floral, butterfly, and star details.',
     },
@@ -241,7 +272,7 @@ export const seed = async ({
   }
 
   const braceletGallery: Array<{ image: Media; variantOption: VariantOption }> = []
-  for (const index of [0, 1]) {
+  for (const index of [32, 33]) {
     const media = await payload.create({
       collection: 'media',
       depth: 0,
