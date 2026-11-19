@@ -41,7 +41,12 @@ export function GCashCheckout() {
   }, [])
 
   const cartItems = (cart?.items || []).filter(
-    (item): item is NonNullable<typeof item> => item != null,
+    (item): item is NonNullable<typeof item> =>
+      item != null &&
+      item.quantity != null &&
+      item.quantity > 0 &&
+      typeof item.product === 'object' &&
+      item.product !== null,
   )
   const total = useMemo(() => {
     return cartItems.reduce((sum, item) => {

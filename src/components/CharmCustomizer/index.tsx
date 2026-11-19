@@ -21,7 +21,7 @@ type Props = {
 
 export function CharmCustomizer({ charms }: Props) {
   const router = useRouter()
-  const { addItem, isLoading } = useCart()
+  const { addItem, cart, isLoading } = useCart()
   const [adding, setAdding] = useState(false)
   const [slots, setSlots] = useState(16)
   const [selected, setSelected] = useState<(Charm | null)[]>(() =>
@@ -62,11 +62,43 @@ export function CharmCustomizer({ charms }: Props) {
 
     setAdding(true)
     try {
-      for (const charm of selected.filter((item): item is Charm => Boolean(item))) {
-        await addItem({
-          product: Number(charm.productId),
-          variant: Number(charm.id),
+      const selectedCharms = selected.filter((item): item is Charm => Boolean(item))
+
+      if (cart?.id) {
+        for (const charm of selectedCharms) {
+          await addItem({
+            product: Number(charm.productId),
+            variant: Number(charm.id),
+          })
+        }
+      } else {
+        const secret = localStorage.getItem('cart_secret')
+        const response = await fetch('/api/carts', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currency: 'PHP',
+            items: selectedCharms.map((charm) => ({
+              product: Number(charm.productId),
+              variant: Number(charm.id),
+              quantity: 1,
+            })),
+            ...(secret ? { secret } : {}),
+          }),
         })
+        if (!response.ok) {
+          throw new Error('Could not create the bracelet cart.')
+        }
+        const created = await response.json()
+        const createdCart = created.doc
+        if (!createdCart?.id) {
+          throw new Error('The bracelet cart was not created.')
+        }
+        localStorage.setItem('cart', String(createdCart.id))
+        if (createdCart.secret) {
+          localStorage.setItem('cart_secret', createdCart.secret)
+        }
       }
 
       const charmOrder = selected.map((charm, index) => ({
@@ -87,7 +119,11 @@ export function CharmCustomizer({ charms }: Props) {
       )
 
       toast.success('Custom bracelet added to your cart.')
-      router.push('/checkout')
+      if (!cart?.id) {
+        window.location.assign('/checkout')
+      } else {
+        router.push('/checkout')
+      }
     } catch {
       toast.error('Could not add the bracelet to your cart.')
     } finally {

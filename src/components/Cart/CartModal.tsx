@@ -27,6 +27,13 @@ export function CartModal() {
   const [isOpen, setIsOpen] = useState(false)
 
   const pathname = usePathname()
+  const validCartItems = useMemo(
+    () =>
+      cart?.items?.filter(
+        (item) => typeof item?.product === 'object' && item.product !== null,
+      ) || [],
+    [cart?.items],
+  )
 
   useEffect(() => {
     // Close the cart modal when the pathname changes.
@@ -34,9 +41,9 @@ export function CartModal() {
   }, [pathname])
 
   const totalQuantity = useMemo(() => {
-    if (!cart || !cart.items || !cart.items.length) return undefined
-    return cart.items.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
-  }, [cart])
+    if (!validCartItems.length) return undefined
+    return validCartItems.reduce((quantity, item) => (item.quantity || 0) + quantity, 0)
+  }, [validCartItems])
 
   return (
     <Sheet onOpenChange={setIsOpen} open={isOpen}>
@@ -51,7 +58,7 @@ export function CartModal() {
           <SheetDescription>Manage your cart here, add items to view the total.</SheetDescription>
         </SheetHeader>
 
-        {!cart || cart?.items?.length === 0 ? (
+        {!cart || validCartItems.length === 0 ? (
           <div className="text-center flex flex-col items-center gap-2">
             <ShoppingCart className="h-16" />
             <p className="text-center text-2xl font-bold">Your cart is empty.</p>
@@ -60,7 +67,7 @@ export function CartModal() {
           <div className="grow flex px-4">
             <div className="flex flex-col justify-between w-full">
               <ul className="grow overflow-auto py-4">
-                {cart?.items?.map((item: NonNullable<Cart['items']>[number], i) => {
+                {validCartItems.map((item: NonNullable<Cart['items']>[number], i) => {
                   const product = item.product
                   const variant = item.variant
 

@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { getSafeRedirect } from 'payload/shared'
 import React, { useCallback, useRef } from 'react'
 import { useForm } from 'react-hook-form'
+import { useEcommerce } from '@payloadcms/plugin-ecommerce/client/react'
 
 type FormData = {
   email: string
@@ -28,6 +29,7 @@ export const LoginForm: React.FC = () => {
     }),
   )
   const { login } = useAuth()
+  const { onLogin } = useEcommerce()
   const router = useRouter()
   const [error, setError] = React.useState<null | string>(null)
 
@@ -41,12 +43,13 @@ export const LoginForm: React.FC = () => {
     async (data: FormData) => {
       try {
         await login(data)
+        await onLogin()
         router.push(redirect.current)
       } catch (_) {
         setError('There was an error with the credentials provided. Please try again.')
       }
     },
-    [login, router],
+    [login, onLogin, router],
   )
 
   return (
