@@ -29,9 +29,8 @@ export function CartModal() {
   const pathname = usePathname()
   const validCartItems = useMemo(
     () =>
-      cart?.items?.filter(
-        (item) => typeof item?.product === 'object' && item.product !== null,
-      ) || [],
+      cart?.items?.filter((item) => typeof item?.product === 'object' && item.product !== null) ||
+      [],
     [cart?.items],
   )
 
@@ -51,7 +50,7 @@ export function CartModal() {
         <OpenCartButton quantity={totalQuantity} />
       </SheetTrigger>
 
-      <SheetContent className="flex flex-col">
+      <SheetContent className="flex h-full min-h-0 flex-col overflow-hidden">
         <SheetHeader>
           <SheetTitle>My Cart</SheetTitle>
 
@@ -64,9 +63,9 @@ export function CartModal() {
             <p className="text-center text-2xl font-bold">Your cart is empty.</p>
           </div>
         ) : (
-          <div className="grow flex px-4">
-            <div className="flex flex-col justify-between w-full">
-              <ul className="grow overflow-auto py-4">
+          <div className="flex min-h-0 grow px-4">
+            <div className="flex min-h-0 w-full flex-col justify-between">
+              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain py-4">
                 {validCartItems.map((item: NonNullable<Cart['items']>[number], i) => {
                   const product = item.product
                   const variant = item.variant
