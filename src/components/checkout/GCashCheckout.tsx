@@ -40,7 +40,9 @@ export function GCashCheckout() {
     }
   }, [])
 
-  const cartItems = cart?.items || []
+  const cartItems = (cart?.items || []).filter(
+    (item): item is NonNullable<typeof item> => item != null,
+  )
   const total = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const product = typeof item.product === 'object' ? item.product : null
@@ -79,7 +81,11 @@ export function GCashCheckout() {
   }, [braceletConfiguration, cartItems])
 
   const normalCartItems = useMemo(() => {
-    if (!braceletMatchesCart || !braceletConfiguration?.charms?.length) return cartItems
+    if (!braceletMatchesCart || !braceletConfiguration?.charms?.length) {
+      return cartItems.flatMap((item) =>
+        item.quantity > 0 ? [{ item, quantity: item.quantity }] : [],
+      )
+    }
 
     const configuredCounts = new Map<string, number>()
     for (const charm of braceletConfiguration.charms) {
@@ -93,7 +99,10 @@ export function GCashCheckout() {
       const quantity = Math.max(0, (item.quantity || 0) - configuredQuantity)
 
       if (variantId) {
-        configuredCounts.set(String(variantId), Math.max(0, configuredQuantity - (item.quantity || 0)))
+        configuredCounts.set(
+          String(variantId),
+          Math.max(0, configuredQuantity - (item.quantity || 0)),
+        )
       }
 
       return quantity > 0 ? [{ item, quantity }] : []
@@ -136,7 +145,7 @@ export function GCashCheckout() {
           className="orbital-checkout-form"
           onSubmitCapture={async (event) => {
             event.preventDefault()
-            if (!cart || !cart.items?.length) {
+            if (!cartItems.length) {
               setError('Your cart is empty.')
               return
             }
@@ -158,7 +167,7 @@ export function GCashCheckout() {
                   paymentMethod,
                   reference: form.get('reference'),
                   braceletConfiguration: braceletMatchesCart ? braceletConfiguration : undefined,
-                  items: cart.items.map((item) => ({
+                  items: cartItems.map((item) => ({
                     product: typeof item.product === 'object' ? item.product?.id : item.product,
                     variant: typeof item.variant === 'object' ? item.variant?.id : item.variant,
                     quantity: item.quantity,

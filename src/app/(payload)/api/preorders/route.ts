@@ -22,13 +22,6 @@ export async function POST(request: NextRequest) {
     if (!items.length) {
       return NextResponse.json({ error: 'Your cart is empty.' }, { status: 400 })
     }
-    if (cart.status === 'purchased' || cart.purchasedAt) {
-      return NextResponse.json(
-        { error: 'This cart has already been checked out.' },
-        { status: 400 },
-      )
-    }
-
     if (!body.name || !body.contact || !body.gradeSection) {
       return NextResponse.json(
         { error: 'Name, contact, and grade or section are required.' },
@@ -154,8 +147,9 @@ export async function POST(request: NextRequest) {
         collection: 'carts',
         id: body.cartId,
         data: {
-          purchasedAt: new Date().toISOString(),
-          status: 'purchased',
+          items: [],
+          purchasedAt: null,
+          status: 'active',
           subtotal: amount,
         },
       })

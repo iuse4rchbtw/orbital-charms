@@ -154,6 +154,10 @@ export const plugins: Plugin[] = [
             type: 'textarea',
             admin: {
               description: 'Exact slot-by-slot charm order for custom Italian bracelets.',
+              readOnly: true,
+              components: {
+                Field: '@/components/admin/BraceletConfigurationField#BraceletConfigurationField',
+              },
             },
           },
           {
