@@ -289,9 +289,6 @@ export function GCashCheckout() {
         ) : (
           <p>No custom bracelet configuration found. Return to the builder to create one.</p>
         )}
-        <p className="orbital-preorder-note">
-          This is a school project pre-order flow. No live payment is processed.
-        </p>
       </aside>
     </div>
   )
