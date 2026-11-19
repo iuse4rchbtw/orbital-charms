@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 
 import { Price } from '@/components/Price'
 
+import { bulkAddCartItems } from '@/actions/bulkAddCartItems'
+
 type Charm = {
   id: string
   productId: string
@@ -21,7 +23,7 @@ type Props = {
 
 export function CharmCustomizer({ charms }: Props) {
   const router = useRouter()
-  const { addItem, cart, isLoading } = useCart()
+  const { refreshCart, cart, isLoading } = useCart()
   const [adding, setAdding] = useState(false)
   const [slots, setSlots] = useState(16)
   const [selected, setSelected] = useState<(Charm | null)[]>(() =>
@@ -63,12 +65,29 @@ export function CharmCustomizer({ charms }: Props) {
     setAdding(true)
     try {
       const selectedCharms = selected.filter((item): item is Charm => Boolean(item))
-
-      for (const charm of selectedCharms) {
-        await addItem({
+      const result = await bulkAddCartItems({
+        cartID: cart?.id,
+        items: selectedCharms.map((charm) => ({
           product: Number(charm.productId),
           variant: Number(charm.id),
-        })
+          quantity: 1,
+        })),
+      })
+
+      
+      if (result.success) {
+        // Persist cart ID / secret in localStorage if a brand-new guest cart was created
+        if (!cart?.id && result.cart?.id) {
+          localStorage.setItem('cart', String(result.cart.id))
+          if ('secret' in result.cart && result.cart.secret) {
+            localStorage.setItem('cart_secret', String(result.cart.secret))
+          }
+        }
+
+        // Sync the useCart React context with the updated cart
+        await refreshCart?.()
+      } else {
+        throw new Error(result.error ?? 'Could not add items to cart.')
       }
 
       const charmOrder = selected.map((charm, index) => ({

@@ -195,7 +195,7 @@ export const seed = async ({
       slug: '3d-charms',
       category: '3D',
       price: 4000,
-      imageIndexes: [9, 10, 11, 12, 13, 21, 22, 23, 24],
+      imageIndexes: [9, 10, 11, 12, 13],
       description:
         'Dimensional statement charms with crystal, floral, butterfly, and star details.',
     },
@@ -204,7 +204,7 @@ export const seed = async ({
       slug: 'dangling-deluxe-charms',
       category: 'Dangling-Deluxe',
       price: 5000,
-      imageIndexes: [14, 15, 16, 17, 18, 19, 20],
+      imageIndexes: [14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
       description: 'Deluxe charms with playful movement and layered decorative details.',
     },
     {
